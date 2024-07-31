@@ -204,6 +204,35 @@ int MatchItemDefinitionGroup(std::string Name, std::string AttrName)
 	return false;
 }
 
+int MatchPreprocessorDefinitions(std::string Name, std::string AttrName)
+{
+	std::regex PreprocessorDefinitions;
+	std::string Pattern("PreprocessorDefinitions");
+	PreprocessorDefinitions = Pattern;
+	if (std::regex_search(Name, PreprocessorDefinitions)) {
+		return true;
+	}
+	return false;
+}
+
+TiXmlElement* Find_PreprocessorDefinitions(TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions")
+{
+	if (ItemDefinitionGroup == NULL) return NULL;
+	TiXmlElement* ClCompile = NULL;
+	TiXmlElement* ClCompileChild = NULL;
+	ClCompile = ItemDefinitionGroup->FirstChildElement();
+	ClCompileChild = ClCompile->FirstChildElement();
+	for (; ClCompileChild; ClCompileChild = ClCompileChild->NextSiblingElement()) {
+		if (ClCompileChild->FirstAttribute() == NULL) {
+			;
+		}
+		if (MatchPreprocessorDefinitions(ClCompileChild->Value(), "")) {
+			DumpXmlNode(std::cout, ClCompileChild);
+		}
+	}
+	return ItemDefinitionGroup;
+}
+
 TiXmlElement* Find_ItemDefinitionGroup(TiXmlElement* Project, const char* name = "ItemDefinitionGroup")
 {
 	if (Project == NULL) return NULL;
@@ -216,6 +245,7 @@ TiXmlElement* Find_ItemDefinitionGroup(TiXmlElement* Project, const char* name =
 		// DumpXmlNode(std::cout, ItemDefinitionGroup);
 		if (MatchItemDefinitionGroup(ItemDefinitionGroup->Value(), ItemDefinitionGroup->FirstAttribute()->Name())) {
 			DumpXmlNode(std::cout, ItemDefinitionGroup);
+			Find_PreprocessorDefinitions(ItemDefinitionGroup);
 		}
 	}
 	return ItemDefinitionGroup;
@@ -285,9 +315,9 @@ TiXmlElement* Find_ItemGroup(TiXmlElement* Project, const char* name = "ItemGrou
 void DumpAllGroup(TiXmlElement* root)
 {
 	if (NULL != root) {
-		// Find_PropertyGroup(root);
-		// Find_ImportGroup(root);
-		// Find_ItemDefinitionGroup(root);
+		Find_PropertyGroup(root);
+		Find_ImportGroup(root);
+		Find_ItemDefinitionGroup(root);
 		Find_ItemGroup(root);
 	}
 }
