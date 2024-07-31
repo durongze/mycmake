@@ -16,12 +16,12 @@ configure_file(${ALL_SRC_DIR}/config.h.win32              ${ALL_SRC_DIR}/config.
 file(GLOB_RECURSE MYCMAKE_HDRS_LIST RELATIVE    ${TOP_SRC_DIR} ${ALL_SRC_DIR}/*.h*)
 file(GLOB_RECURSE MYCMAKE_SRCS_LIST RELATIVE    ${TOP_SRC_DIR} ${ALL_SRC_DIR}/*.c*)
 
-#add_library(mycmake               STATIC      ${MYCMAKE_HDRS_LIST} ${MYCMAKE_SRCS_LIST} )
-ADD_EXECUTABLE(mycmake             ${MYCMAKE_HDRS_LIST} ${MYCMAKE_SRCS_LIST} )
-target_compile_definitions(mycmake PRIVATE     UNICODE;_UNICODE )
-target_include_directories(mycmake PUBLIC      ./src)
-target_link_directories(mycmake    PUBLIC      ./lib)
-SET_TARGET_PROPERTIES(mycmake      PROPERTIES  CLEAN_DIRECT_OUTPUT 1     OUTPUT_NAME "mycmake")
+#add_library               (mycmake              STATIC      ${MYCMAKE_HDRS_LIST} ${MYCMAKE_SRCS_LIST} )
+ADD_EXECUTABLE             (mycmake              ${MYCMAKE_HDRS_LIST} ${MYCMAKE_SRCS_LIST} )
+target_compile_definitions (mycmake  PRIVATE     UNICODE;_UNICODE )
+target_include_directories (mycmake  PUBLIC      ./src)
+target_link_directories    (mycmake  PUBLIC      ./lib)
+SET_TARGET_PROPERTIES      (mycmake  PROPERTIES  CLEAN_DIRECT_OUTPUT 1     OUTPUT_NAME "mycmake")
 
 SET(install_targets mycmake )
 SET(install_hdr_dir include)

@@ -1,24 +1,6 @@
 @rem set VSCMD_DEBUG=2
-@rem %comspec% /k "F:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
 
-set VisualStudioCmd="F:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
-
-set VisualStudioCmd="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat"
-set VisualStudioCmd="C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64\vcvars64.bat"
-
-set VisualStudioCmd="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat"
-set VisualStudioCmd="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
-
-set VisualStudioCmd="E:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-set VisualStudioCmd="E:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-
-set VisualStudioCmd="E:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-set VisualStudioCmd="E:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-
-set VisualStudioCmd="E:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
-
-set VisualStudioCmd="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
-set VisualStudioCmd="C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+call :DetectVsPath VisualStudioCmd
 
 set old_sys_include="%include%"
 set old_sys_lib="%lib%"
@@ -53,7 +35,7 @@ echo ProjName %ProjName%
 CALL %VisualStudioCmd%
 
 set BuildDir=BuildSrc
-copy srcCMakeLists.txt CMakeLists.txt /y
+@rem copy srcCMakeLists.txt CMakeLists.txt /y
 call :CompileProject %BuildDir% %BuildType% %ProjName%
 
 @rem set BuildDir=BuildLib
@@ -61,6 +43,79 @@ call :CompileProject %BuildDir% %BuildType% %ProjName%
 @rem call :CompileProject %BuildDir% %BuildType% %ProjName%
 
 pause
+goto :eof
+
+:CheckLibInDir
+    setlocal EnableDelayedExpansion
+    set Libs=%~1
+    set LibDir="%~2"
+    set ProjDir=%~3
+    set MyPlatformSDK=%ProjDir%\lib
+    if not exist "%MyPlatformSDK%" (
+        mkdir %MyPlatformSDK%
+    )
+    call :color_text 2f "+++++++++++++++++++CheckLibInDir+++++++++++++++++++++++"
+    echo LibDir %LibDir%
+    if not exist %LibDir% (
+        call :color_text 4f "--------------------CheckLibInDir-----------------------"
+        goto :eof
+    )
+
+    pushd %LibDir%
+    set idx=0
+    for %%i in (%Libs%) do (
+        set /a idx+=1
+        set CurLib=%%i
+        echo [!idx!] !LibDir!\!CurLib!
+        if not exist !LibDir!\!CurLib! (
+            echo !LibDir!\!CurLib!
+        ) else (
+            copy !LibDir!\!CurLib! %MyPlatformSDK%
+        )
+    )
+    popd
+    call :color_text 2f "--------------------CheckLibInDir-----------------------"
+    endlocal
+goto :eof
+
+:DetectVsPath
+    setlocal EnableDelayedExpansion
+    set VsBatFileVar=%~1
+
+    set VisualStudioCmdSet="F:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 8\VC\vcvarsall.bat"
+
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat"
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64\vcvars64.bat"
+
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat"
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
+
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+    
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+    
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
+    
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
+    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
+    call :color_text 2f "+++++++++++++++++++DetectVsPath+++++++++++++++++++++++"
+    set CurBat=
+    set idx=0
+    for %%i in (%VisualStudioCmdSet%) do (
+        set /a idx+=1
+        set CurBat=%%i
+        echo [!idx!] !CurBat!
+        if exist !CurBat! (
+            goto DetectVsPathBreak
+        )
+    )
+    :DetectVsPathBreak
+    echo Use:%CurBat%
+    call :color_text 2f "--------------------DetectVsPath-----------------------"
+    endlocal & set "%~1=%CurBat%"
 goto :eof
 
 :CompileProject
@@ -75,7 +130,7 @@ goto :eof
     if not exist %BuildDir%\%BuildType% (
         mkdir %BuildDir%\%BuildType%\
     )
-    for /f %%i in ('dir /s /b "out\windows\*.dll"') do (   copy %%i %BuildDir%\%BuildType%\ )
+    @rem for /f %%i in ('dir /s /b "out\windows\*.dll"') do (   copy %%i %BuildDir%\%BuildType%\ )
     pushd %BuildDir%
         @rem del * /q /s
         @rem cmake .. -G"Visual Studio 16 2019" -A Win64
@@ -84,7 +139,7 @@ goto :eof
         cmake .. -DDYZ_DBG=ON -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ProgramDir%\%ProjName%
         @rem call :ResetSystemEnv
         @rem cmake --build .  --config %BuildType%  --target %ProjName%
-        cmake --build . -j16  --config %BuildType% --target ProjName
+        cmake --build . -j16  --config %BuildType% --target  %ProjName%
     popd
     endlocal
 goto :eof
@@ -201,6 +256,8 @@ goto :eof
 goto :eof
 
 :ShowVS2022InfoOnWin10
+    setlocal EnableDelayedExpansion
+    call :color_text 2f "+++++++++++++++++++ShowVS2022InfoOnWin10+++++++++++++++++++++++"
     @rem HKCU\SOFTWARE  or  HKCU\SOFTWARE\Wow6432Node
     @rem see winsdk.bat -> GetWin10SdkDir -> GetWin10SdkDirHelper -> reg query "%1\Microsoft\Microsoft SDKs\Windows\v10.0" /v "InstallationFolder"
     @rem see winsdk.bat -> GetUniversalCRTSdkDir -> GetUniversalCRTSdkDirHelper -> reg query "%1\Microsoft\Windows Kits\Installed Roots" /v "KitsRoot10"
@@ -212,6 +269,8 @@ goto :eof
     reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" /v "KitsRoot10"
     @rem reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" /v KitsRoot10 
     @rem reg add    "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" /v KitsRoot10         /f /t REG_SZ /d "D:\Program Files (x86)\Windows Kits\10\"
+    call :color_text 2f "--------------------ShowVS2022InfoOnWin10-----------------------"
+    endlocal
 goto :eof
 
 @rem YellowBackground    6f  ef
@@ -456,8 +515,9 @@ goto :eof
     set year=%date:~6,4%
     set month=%date:~4,2%
     set day=%date:~0,2%
-    set dateStr=%year%_%month%_%day%
-    set dateStr=%dateStr:/=%
-    set timeStr=%time::=%
-    endlocal & set %~1=%dateStr%_%timeStr%
+    set dateStr=%date: =_%
+    set dateStr=%dateStr:/=x%
+    set timeStr=%time::=x%
+    set timeStr=%time: =%
+    endlocal & set %~1=%dateStr%__%timeStr%
 goto :eof
