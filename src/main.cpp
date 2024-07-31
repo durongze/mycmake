@@ -12,7 +12,9 @@
 #include "tinyxml.h"
 #include "xml_adapter.h"
 #include "my_sys.h"
+#include "cmake_file.h"
 
+CMakeFile cmake_file("CMakeLists.txt");
 
 inline wchar_t* AnsiToUnicode(const char* szStr)
 {
@@ -228,6 +230,7 @@ TiXmlElement* Find_PreprocessorDefinitions(TiXmlElement* ItemDefinitionGroup, co
 		}
 		if (MatchPreprocessorDefinitions(ClCompileChild->Value(), "")) {
 			DumpXmlNode(std::cout, ClCompileChild);
+			cmake_file.write(ClCompileChild->GetText());
 		}
 	}
 	return ItemDefinitionGroup;
@@ -275,6 +278,7 @@ TiXmlElement* Find_ItemGroup_ClCompile(TiXmlElement* ItemGroup, const char* name
 		}
 		if (MatchItemGroup_ClCompile(ClCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClCompile);
+			cmake_file.write(ClCompile->FirstAttribute()->Value());
 		}
 	}
 }
@@ -315,6 +319,7 @@ TiXmlElement* Find_ItemGroup(TiXmlElement* Project, const char* name = "ItemGrou
 void DumpAllGroup(TiXmlElement* root)
 {
 	if (NULL != root) {
+		cmake_file.create();
 		Find_PropertyGroup(root);
 		Find_ImportGroup(root);
 		Find_ItemDefinitionGroup(root);
