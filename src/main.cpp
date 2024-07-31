@@ -283,6 +283,64 @@ TiXmlElement* Find_ItemGroup_ClCompile(TiXmlElement* ItemGroup, const char* name
 	}
 }
 
+int MatchItemGroup_ClInclude(std::string Name, std::string AttrName)
+{
+	std::regex ClInclude;
+	std::string Pattern("ClInclude");
+	std::string AttrPattern("Include");
+	ClInclude = Pattern;
+	if (std::regex_search(Name, ClInclude)) {
+		ClInclude = AttrPattern;
+		return std::regex_search(AttrName, ClInclude);
+	}
+	return false;
+}
+
+TiXmlElement* Find_ItemGroup_ClInclude(TiXmlElement* ItemGroup, const char* name = "ClInclude")
+{
+	if (ItemGroup == NULL) return NULL;
+	TiXmlElement* ClInclude = NULL;
+	ClInclude = ItemGroup->FirstChildElement();
+	for (; ClInclude; ClInclude = ClInclude->NextSiblingElement()) {
+		if (ClInclude->FirstAttribute() == NULL) {
+			continue;
+		}
+		if (MatchItemGroup_ClInclude(ClInclude->Value(), "Include")) {
+			DumpXmlNode(std::cout, ClInclude);
+			cmake_file.write(ClInclude->FirstAttribute()->Value());
+		}
+	}
+}
+
+int MatchItemGroup_ResourceCompile(std::string Name, std::string AttrName)
+{
+	std::regex ResourceCompile;
+	std::string Pattern("ResourceCompile");
+	std::string AttrPattern("Include");
+	ResourceCompile = Pattern;
+	if (std::regex_search(Name, ResourceCompile)) {
+		ResourceCompile = AttrPattern;
+		return std::regex_search(AttrName, ResourceCompile);
+	}
+	return false;
+}
+
+TiXmlElement* Find_ItemGroup_ResourceCompile(TiXmlElement* ItemGroup, const char* name = "ResourceCompile")
+{
+	if (ItemGroup == NULL) return NULL;
+	TiXmlElement* ResourceCompile = NULL;
+	ResourceCompile = ItemGroup->FirstChildElement();
+	for (; ResourceCompile; ResourceCompile = ResourceCompile->NextSiblingElement()) {
+		if (ResourceCompile->FirstAttribute() == NULL) {
+			continue;
+		}
+		if (MatchItemGroup_ResourceCompile(ResourceCompile->Value(), "Include")) {
+			DumpXmlNode(std::cout, ResourceCompile);
+			cmake_file.write(ResourceCompile->FirstAttribute()->Value());
+		}
+	}
+}
+
 int MatchItemGroup(std::string Name, std::string AttrName)
 {
 	std::regex ItemGroup;
@@ -310,6 +368,8 @@ TiXmlElement* Find_ItemGroup(TiXmlElement* Project, const char* name = "ItemGrou
 		if (MatchItemGroup(ItemGroup->Value(), "")) {
 			// DumpXmlNode(std::cout, ItemGroup);
 			Find_ItemGroup_ClCompile(ItemGroup);
+			Find_ItemGroup_ClInclude(ItemGroup); // error
+			Find_ItemGroup_ResourceCompile(ItemGroup); // error
 		}
 	}
 	return ItemGroup;
