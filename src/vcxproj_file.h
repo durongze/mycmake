@@ -38,6 +38,8 @@ TiXmlElement* Find_ItemDefinitionGroup(CMakeFile& cmakeFile, TiXmlElement* Proje
 int MatchPreprocessorDefinitions(std::string Name, std::string AttrName);
 TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions");
 
+int MatchItemGroup_NASM(std::string Name, std::string AttrName);
+TiXmlElement* Find_ItemGroup_NASM(CMakeFile& cmakeFile, TiXmlElement* ItemGroup, const char* name = "NASM");
 
 int MatchItemGroup_ClCompile(std::string Name, std::string AttrName);
 TiXmlElement* Find_ItemGroup_ClCompile(CMakeFile& cmakeFile, TiXmlElement* ItemGroup, const char* name = "ClCompile");
