@@ -189,17 +189,17 @@ TiXmlElement* Find_ItemGroup_NASM(CMakeFile& cmakeFile, TiXmlElement* ItemGroup,
 	int asmIdx = 0;
 
 	ClCompile = ItemGroup->FirstChildElement();
-	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement(), asmIdx++) {
+	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement()) {
 		if (ClCompile->FirstAttribute() == NULL) {
 			continue;
 		}
 		if (MatchItemGroup_NASM(ClCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClCompile);
-			asmMap[ClCompile->FirstAttribute()->Value()] = asmIdx;
+			asmMap[ClCompile->FirstAttribute()->Value()] = asmIdx++;
 		}
 	}
 
-	cmakeFile.write(asmMap);
+	cmakeFile.write(asmMap, CMakeFile::FILE_TYPE_ASM);
 
 }
 
@@ -224,17 +224,17 @@ TiXmlElement* Find_ItemGroup_ClCompile(CMakeFile& cmakeFile, TiXmlElement* ItemG
 	std::map<std::string, int> cppMap;
 	int cppIdx = 0;
 	ClCompile = ItemGroup->FirstChildElement();
-	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement(), cppIdx++) {
+	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement()) {
 		if (ClCompile->FirstAttribute() == NULL) {
 			continue;
 		}
 		if (MatchItemGroup_ClCompile(ClCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClCompile);
-			cppMap[ClCompile->FirstAttribute()->Value()] = cppIdx;
+			cppMap[ClCompile->FirstAttribute()->Value()] = cppIdx++;
 		}
 	}
 
-	cmakeFile.write(cppMap);
+	cmakeFile.write(cppMap, CMakeFile::FILE_TYPE_CPP);
 }
 
 int MatchItemGroup_ClInclude(std::string Name, std::string AttrName)
@@ -263,10 +263,10 @@ TiXmlElement* Find_ItemGroup_ClInclude(CMakeFile& cmakeFile, TiXmlElement* ItemG
 		}
 		if (MatchItemGroup_ClInclude(ClInclude->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClInclude);
-			incMap[ClInclude->FirstAttribute()->Value()] = incIdx;
+			incMap[ClInclude->FirstAttribute()->Value()] = incIdx++;
 		}
 	}
-	cmakeFile.write(incMap);
+	cmakeFile.write(incMap, CMakeFile::FILE_TYPE_HPP);
 }
 
 int MatchItemGroup_ResourceCompile(std::string Name, std::string AttrName)
@@ -286,6 +286,8 @@ TiXmlElement* Find_ItemGroup_ResourceCompile(CMakeFile& cmakeFile, TiXmlElement*
 {
 	if (ItemGroup == NULL) return NULL;
 	TiXmlElement* ResourceCompile = NULL;
+	std::map<std::string, int> resMap;
+	int resIdx = 0;
 	ResourceCompile = ItemGroup->FirstChildElement();
 	for (; ResourceCompile; ResourceCompile = ResourceCompile->NextSiblingElement()) {
 		if (ResourceCompile->FirstAttribute() == NULL) {
@@ -293,9 +295,10 @@ TiXmlElement* Find_ItemGroup_ResourceCompile(CMakeFile& cmakeFile, TiXmlElement*
 		}
 		if (MatchItemGroup_ResourceCompile(ResourceCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ResourceCompile);
-			cmakeFile.write(ResourceCompile->FirstAttribute()->Value());
+			resMap[ResourceCompile->FirstAttribute()->Value()] = resIdx++;
 		}
 	}
+	cmakeFile.write(resMap, CMakeFile::FILE_TYPE_RES);
 }
 
 int MatchItemGroup(std::string Name, std::string AttrName)
