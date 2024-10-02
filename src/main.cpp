@@ -217,7 +217,7 @@ int MatchPreprocessorDefinitions(std::string Name, std::string AttrName)
 	return false;
 }
 
-TiXmlElement* Find_PreprocessorDefinitions(TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions")
+TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions")
 {
 	if (ItemDefinitionGroup == NULL) return NULL;
 	TiXmlElement* ClCompile = NULL;
@@ -230,13 +230,13 @@ TiXmlElement* Find_PreprocessorDefinitions(TiXmlElement* ItemDefinitionGroup, co
 		}
 		if (MatchPreprocessorDefinitions(ClCompileChild->Value(), "")) {
 			DumpXmlNode(std::cout, ClCompileChild);
-			cmake_file.write(ClCompileChild->GetText());
+			cmakeFile.write(ClCompileChild->GetText());
 		}
 	}
 	return ItemDefinitionGroup;
 }
 
-TiXmlElement* Find_ItemDefinitionGroup(TiXmlElement* Project, const char* name = "ItemDefinitionGroup")
+TiXmlElement* Find_ItemDefinitionGroup(CMakeFile& cmakeFile, TiXmlElement* Project, const char* name = "ItemDefinitionGroup")
 {
 	if (Project == NULL) return NULL;
 	TiXmlElement* ItemDefinitionGroup = NULL; // Condition=""
@@ -248,7 +248,7 @@ TiXmlElement* Find_ItemDefinitionGroup(TiXmlElement* Project, const char* name =
 		// DumpXmlNode(std::cout, ItemDefinitionGroup);
 		if (MatchItemDefinitionGroup(ItemDefinitionGroup->Value(), ItemDefinitionGroup->FirstAttribute()->Name())) {
 			DumpXmlNode(std::cout, ItemDefinitionGroup);
-			Find_PreprocessorDefinitions(ItemDefinitionGroup);
+			Find_PreprocessorDefinitions(cmakeFile, ItemDefinitionGroup);
 		}
 	}
 	return ItemDefinitionGroup;
@@ -267,7 +267,7 @@ int MatchItemGroup_ClCompile(std::string Name, std::string AttrName)
 	return false;
 }
 
-TiXmlElement* Find_ItemGroup_ClCompile(TiXmlElement* ItemGroup, const char* name = "ClCompile")
+TiXmlElement* Find_ItemGroup_ClCompile(CMakeFile& cmakeFile, TiXmlElement* ItemGroup, const char* name = "ClCompile")
 {
 	if (ItemGroup == NULL) return NULL;
 	TiXmlElement* ClCompile = NULL; 
@@ -278,7 +278,7 @@ TiXmlElement* Find_ItemGroup_ClCompile(TiXmlElement* ItemGroup, const char* name
 		}
 		if (MatchItemGroup_ClCompile(ClCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClCompile);
-			cmake_file.write(ClCompile->FirstAttribute()->Value());
+			cmakeFile.write(ClCompile->FirstAttribute()->Value());
 		}
 	}
 }
@@ -296,7 +296,7 @@ int MatchItemGroup_ClInclude(std::string Name, std::string AttrName)
 	return false;
 }
 
-TiXmlElement* Find_ItemGroup_ClInclude(TiXmlElement* ItemGroup, const char* name = "ClInclude")
+TiXmlElement* Find_ItemGroup_ClInclude(CMakeFile& cmakeFile, TiXmlElement* ItemGroup, const char* name = "ClInclude")
 {
 	if (ItemGroup == NULL) return NULL;
 	TiXmlElement* ClInclude = NULL;
@@ -307,7 +307,7 @@ TiXmlElement* Find_ItemGroup_ClInclude(TiXmlElement* ItemGroup, const char* name
 		}
 		if (MatchItemGroup_ClInclude(ClInclude->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClInclude);
-			cmake_file.write(ClInclude->FirstAttribute()->Value());
+			cmakeFile.write(ClInclude->FirstAttribute()->Value());
 		}
 	}
 }
@@ -325,7 +325,7 @@ int MatchItemGroup_ResourceCompile(std::string Name, std::string AttrName)
 	return false;
 }
 
-TiXmlElement* Find_ItemGroup_ResourceCompile(TiXmlElement* ItemGroup, const char* name = "ResourceCompile")
+TiXmlElement* Find_ItemGroup_ResourceCompile(CMakeFile& cmakeFile, TiXmlElement* ItemGroup, const char* name = "ResourceCompile")
 {
 	if (ItemGroup == NULL) return NULL;
 	TiXmlElement* ResourceCompile = NULL;
@@ -336,7 +336,7 @@ TiXmlElement* Find_ItemGroup_ResourceCompile(TiXmlElement* ItemGroup, const char
 		}
 		if (MatchItemGroup_ResourceCompile(ResourceCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ResourceCompile);
-			cmake_file.write(ResourceCompile->FirstAttribute()->Value());
+			cmakeFile.write(ResourceCompile->FirstAttribute()->Value());
 		}
 	}
 }
@@ -354,7 +354,7 @@ int MatchItemGroup(std::string Name, std::string AttrName)
 	return false;
 }
 
-TiXmlElement* Find_ItemGroup(TiXmlElement* Project, const char* name = "ItemGroup")
+TiXmlElement* Find_ItemGroup(CMakeFile &cmakeFile, TiXmlElement* Project, const char* name = "ItemGroup")
 {
 	if (Project == NULL) return NULL;
 	TiXmlElement* ItemGroup = NULL; // Condition=""
@@ -367,23 +367,23 @@ TiXmlElement* Find_ItemGroup(TiXmlElement* Project, const char* name = "ItemGrou
 		// DumpXmlNode(std::cout, ItemGroup);
 		if (MatchItemGroup(ItemGroup->Value(), "")) {
 			// DumpXmlNode(std::cout, ItemGroup);
-			Find_ItemGroup_ClCompile(ItemGroup);
-			Find_ItemGroup_ClInclude(ItemGroup); // error
-			Find_ItemGroup_ResourceCompile(ItemGroup); // error
+			Find_ItemGroup_ClCompile(cmakeFile, ItemGroup);
+			Find_ItemGroup_ClInclude(cmakeFile, ItemGroup); // error
+			Find_ItemGroup_ResourceCompile(cmakeFile, ItemGroup); // error
 		}
 	}
 	return ItemGroup;
 }
 
 
-void DumpAllGroup(TiXmlElement* root)
+void DumpAllGroup(CMakeFile& cmakeFile, TiXmlElement* root)
 {
 	if (NULL != root) {
-		cmake_file.create();
+		cmakeFile.create();
 		Find_PropertyGroup(root);
 		Find_ImportGroup(root);
-		Find_ItemDefinitionGroup(root);
-		Find_ItemGroup(root);
+		Find_ItemDefinitionGroup(cmakeFile, root);
+		Find_ItemGroup(cmakeFile, root);
 	}
 }
 
@@ -401,7 +401,7 @@ int ParseProjMain(std::string &fileName)
 	}
 	root = doc.RootElement();
 	// DumpProjectConfiguration(root);
-	DumpAllGroup(root);
+	DumpAllGroup(cmake_file, root);
 	return 0;
 }
 
