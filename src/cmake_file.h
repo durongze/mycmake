@@ -4,6 +4,9 @@
 #include <fstream>
 #include <string>
 
+#include <strstream>
+#include <map>
+
 class CMakeFile{
 public:
 	CMakeFile(const char* filename);
@@ -11,6 +14,7 @@ public:
 	~CMakeFile();
 	int create();
 	int write(const std::string& txt);
+	int write(const std::map<std::string, int>& cppMap);
 private:
 	std::fstream m_fs;
     std::string  m_name;

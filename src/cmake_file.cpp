@@ -26,3 +26,14 @@ int CMakeFile::write(const std::string& txt)
 	m_fs.close();
 	return 0;
 }
+
+int CMakeFile::write(const std::map<std::string, int>& cppMap)
+{
+	std::map<std::string, int>::const_iterator iterCppMap;
+	m_fs.open(m_name, std::ios::out | std::ios::app);
+	for (iterCppMap = cppMap.cbegin(); iterCppMap != cppMap.cend(); iterCppMap++) {
+		m_fs << (iterCppMap->first) << std::endl;
+	}
+	m_fs.close();
+	return 0;
+}

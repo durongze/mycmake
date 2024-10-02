@@ -1,11 +1,36 @@
 #include "vcxproj_path.h"
 
 #include "my_fs.h"
-#include <string>
-#include <map>
-#include <vector>
 
-int CompareFileNameByPath(std::map<std::string, int> fileMap, std::string filePath, std::string fileExt)
+#include <iostream>
+
+void DumpStrMap(std::map<std::string, int> &strMap, std::ostream &os)
+{
+	std::map<std::string, int>::iterator iterStrMap;
+	for (iterStrMap = strMap.begin(); iterStrMap != strMap.end(); iterStrMap++)
+	{
+		os << "[" << iterStrMap->second << "]:" << std::endl;
+	}
+}
+
+int RecordAllDirByFiles(std::map<std::string, int>& fileMap)
+{
+	std::map<std::string, int> dirMap;
+	std::map<std::string, int>::iterator iterFileMap;
+	std::string dirName;
+	int dirIdx = 0;
+	int dirLen = 0;
+	for (iterFileMap = fileMap.begin(); iterFileMap != fileMap.end(); iterFileMap++, dirIdx++)
+	{
+		dirLen = iterFileMap->first.length() - iterFileMap->first.rfind(DIR_SEP);
+		dirName = iterFileMap->first.substr(0, dirLen);
+		dirMap[dirName] = dirIdx;
+	}
+	DumpStrMap(dirMap, std::cout);
+	return 0;
+}
+
+int CompareFileNameByPath(std::map<std::string, int> &fileMap, std::string &filePath, std::string &fileExt)
 {
 	std::vector<std::string> files;
 	std::vector<std::string>::iterator iterFile;
@@ -39,6 +64,12 @@ int CompareFileNameByPath(std::map<std::string, int> fileMap, std::string filePa
 	while (iterFileMap != fileMap.end()) {
 		iterFileMap++;
 	}
+
+	return 0;
+}
+
+int GenCMakeFileList(std::map<std::string, int>& fileMap)
+{
 
 	return 0;
 }

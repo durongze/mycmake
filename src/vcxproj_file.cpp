@@ -187,7 +187,7 @@ TiXmlElement* Find_ItemGroup_NASM(CMakeFile& cmakeFile, TiXmlElement* ItemGroup,
 	TiXmlElement* ClCompile = NULL;
 	std::map<std::string, int> asmMap;
 	int asmIdx = 0;
-	std::map<std::string, int>::iterator iterAsmMap;
+
 	ClCompile = ItemGroup->FirstChildElement();
 	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement(), asmIdx++) {
 		if (ClCompile->FirstAttribute() == NULL) {
@@ -198,9 +198,9 @@ TiXmlElement* Find_ItemGroup_NASM(CMakeFile& cmakeFile, TiXmlElement* ItemGroup,
 			asmMap[ClCompile->FirstAttribute()->Value()] = asmIdx;
 		}
 	}
-	for (iterAsmMap = asmMap.begin(); iterAsmMap != asmMap.end(); iterAsmMap++) {
-		cmakeFile.write(iterAsmMap->first);
-	}
+
+	cmakeFile.write(asmMap);
+
 }
 
 
@@ -223,7 +223,6 @@ TiXmlElement* Find_ItemGroup_ClCompile(CMakeFile& cmakeFile, TiXmlElement* ItemG
 	TiXmlElement* ClCompile = NULL;
 	std::map<std::string, int> cppMap;
 	int cppIdx = 0;
-	std::map<std::string, int>::iterator iterCppMap;
 	ClCompile = ItemGroup->FirstChildElement();
 	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement(), cppIdx++) {
 		if (ClCompile->FirstAttribute() == NULL) {
@@ -234,9 +233,8 @@ TiXmlElement* Find_ItemGroup_ClCompile(CMakeFile& cmakeFile, TiXmlElement* ItemG
 			cppMap[ClCompile->FirstAttribute()->Value()] = cppIdx;
 		}
 	}
-	for (iterCppMap = cppMap.begin(); iterCppMap != cppMap.end(); iterCppMap++) {
-		cmakeFile.write(iterCppMap->first);
-	}
+
+	cmakeFile.write(cppMap);
 }
 
 int MatchItemGroup_ClInclude(std::string Name, std::string AttrName)
@@ -258,7 +256,6 @@ TiXmlElement* Find_ItemGroup_ClInclude(CMakeFile& cmakeFile, TiXmlElement* ItemG
 	TiXmlElement* ClInclude = NULL;
 	std::map<std::string, int> incMap;
 	int incIdx = 0;
-	std::map<std::string, int>::iterator iterIncMap;
 	ClInclude = ItemGroup->FirstChildElement();
 	for (; ClInclude; ClInclude = ClInclude->NextSiblingElement()) {
 		if (ClInclude->FirstAttribute() == NULL) {
@@ -269,9 +266,7 @@ TiXmlElement* Find_ItemGroup_ClInclude(CMakeFile& cmakeFile, TiXmlElement* ItemG
 			incMap[ClInclude->FirstAttribute()->Value()] = incIdx;
 		}
 	}
-	for (iterIncMap = incMap.begin(); iterIncMap != incMap.end(); iterIncMap++) {
-		cmakeFile.write(iterIncMap->first);
-	}
+	cmakeFile.write(incMap);
 }
 
 int MatchItemGroup_ResourceCompile(std::string Name, std::string AttrName)

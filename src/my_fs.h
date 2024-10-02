@@ -6,12 +6,18 @@
 #include <vector>
 
 #ifdef WIN32
+
+#define DIR_SEP "\\"
+
 #ifdef MY_MRP_IO
 #define MRP_API __declspec(dllexport)
 #else
 #define MRP_API __declspec(dllimport)
 #endif
 #else
+
+#define DIR_SEP "/"
+
 #define MRP_API
 #endif
 

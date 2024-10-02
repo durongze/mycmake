@@ -11,7 +11,7 @@
 
 #ifdef _WIN32
 #include <io.h>
-#define DIR_SEP "\\"
+
 int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::string>& files)
 {
     struct _finddata_t s_file;
@@ -33,7 +33,7 @@ int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::str
 }
 #else
 #include <dirent.h>
-#define DIR_SEP "/"
+
 /*
  *struct dirent {
      ino_t          d_ino;       //Inode number
