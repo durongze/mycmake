@@ -271,15 +271,21 @@ TiXmlElement* Find_ItemGroup_ClCompile(CMakeFile& cmakeFile, TiXmlElement* ItemG
 {
 	if (ItemGroup == NULL) return NULL;
 	TiXmlElement* ClCompile = NULL; 
+	std::map<std::string, int> cppMap;
+	int incIdx = 0;
+	std::map<std::string, int>::iterator iterCppMap;
 	ClCompile = ItemGroup->FirstChildElement();
-	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement()) {
+	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement(), incIdx++) {
 		if (ClCompile->FirstAttribute() == NULL) {
 			continue;
 		}
 		if (MatchItemGroup_ClCompile(ClCompile->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClCompile);
-			cmakeFile.write(ClCompile->FirstAttribute()->Value());
+			cppMap[ClCompile->FirstAttribute()->Value()] = incIdx;
 		}
+	}
+	for (iterCppMap = cppMap.begin(); iterCppMap != cppMap.end(); iterCppMap++) {
+		cmakeFile.write(iterCppMap->first);
 	}
 }
 
@@ -300,6 +306,9 @@ TiXmlElement* Find_ItemGroup_ClInclude(CMakeFile& cmakeFile, TiXmlElement* ItemG
 {
 	if (ItemGroup == NULL) return NULL;
 	TiXmlElement* ClInclude = NULL;
+	std::map<std::string, int> incMap;
+	int incIdx = 0;
+	std::map<std::string, int>::iterator iterIncMap;
 	ClInclude = ItemGroup->FirstChildElement();
 	for (; ClInclude; ClInclude = ClInclude->NextSiblingElement()) {
 		if (ClInclude->FirstAttribute() == NULL) {
@@ -307,8 +316,11 @@ TiXmlElement* Find_ItemGroup_ClInclude(CMakeFile& cmakeFile, TiXmlElement* ItemG
 		}
 		if (MatchItemGroup_ClInclude(ClInclude->Value(), "Include")) {
 			DumpXmlNode(std::cout, ClInclude);
-			cmakeFile.write(ClInclude->FirstAttribute()->Value());
+			incMap[ClInclude->FirstAttribute()->Value()] = incIdx;
 		}
+	}
+	for (iterIncMap = incMap.begin(); iterIncMap != incMap.end(); iterIncMap++) {
+		cmakeFile.write(iterIncMap->first);
 	}
 }
 
