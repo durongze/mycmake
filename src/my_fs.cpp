@@ -21,7 +21,12 @@ int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::str
     if (h_file != static_cast<intptr_t>(-1.0)) {
         do {
             if (withDir) {
-                files.push_back(dirName + "\\" + s_file.name);
+                if (*dirName.rbegin() == '\\') {
+                    files.push_back(dirName + s_file.name);
+                }
+                else {
+                    files.push_back(dirName + "\\" + s_file.name);
+                }
             }
             else {
                 files.push_back(std::string(s_file.name));

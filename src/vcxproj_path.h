@@ -4,13 +4,14 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <iostream>
 
-void DumpStrMap(std::map<std::string, int>& strMap, std::ostream& os);
+void DumpStrMap(std::map<std::string, int>& strMap, const std::string& fileExt, std::ostream& os);
 
-int RecordAllDirByFiles(std::map<std::string, int> &fileMap);
+int RecordAllDirByFiles(const std::map<std::string, int> &fileMap, std::map<std::string, int>& dirMap);
 
-int CompareFileNameByPath(std::map<std::string, int> &fileMap, std::string &filePath, std::string &fileExt);
+int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::string &filePath, const std::string &fileExt, std::ostream& os = std::cout);
 
-int GenCMakeFileList(std::map<std::string, int>& fileMap);
+int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt);
 
 #endif

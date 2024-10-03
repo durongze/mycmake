@@ -4,7 +4,7 @@
 #include <cctype>
 #include <strstream>
 
-
+#include "vcxproj_path.h"
 #include "my_fs.h"
 
 CMakeVar::CMakeVar(const char* varName) :m_varName(varName){
@@ -76,37 +76,75 @@ std::string ToLowerStr(std::string str)
 	return str;
 }
 
+std::string CMakeFile::GetExtName(int FileType)
+{
+	std::strstream fs;
+	switch (FileType) {
+	case FILE_TYPE_ASM:
+		fs << ".asm";
+		break;
+	case FILE_TYPE_CPP:
+		fs << ".cpp";
+		break;
+	case FILE_TYPE_HPP:
+		fs << ".h";
+		break;
+	case FILE_TYPE_RES:
+		fs << ".rc";
+		break;
+	case FILE_TYPE_DEF:
+		fs << ".*";
+		break;
+	default:
+		fs << ".*";
+		break;
+	}
+	fs << std::ends;
+	return fs.str();
+}
+
+std::string CMakeFile::GetCMakeVarName(int FileType)
+{
+	std::strstream fs;
+	switch (FileType) {
+	case FILE_TYPE_ASM:
+		fs << GetProjAsmList().Name();
+		break;
+	case FILE_TYPE_CPP:
+		fs << GetProjSrcList().Name();
+		break;
+	case FILE_TYPE_HPP:
+		fs << GetProjIncList().Name();
+		break;
+	case FILE_TYPE_RES:
+		fs << GetProjResList().Name();
+		break;
+	case FILE_TYPE_DEF:
+		fs << GetProjDefList().Name();
+		break;
+	default:
+		fs << CMAKE_FIILE_TO_STR(FILE_TYPE_DEF);
+		break;
+	}
+	fs << std::ends;
+	return fs.str();
+}
+
 int CMakeFile::write(const std::map<std::string, int>& fileMap, int FileType)
 {
 	std::map<std::string, int>::const_iterator iterCppMap;
-
+	std::map<std::string, int> dirMap;
 	if (fileMap.size() == 0) {
 		return 0;
 	}
 
+	return CheckFileList(fileMap, GetExtName(FileType));
+
 	m_fs.open(m_name, std::ios::out | std::ios::app);
 	m_fs << "set (";
-	switch (FileType) {
-		case FILE_TYPE_ASM:
-			m_fs << GetProjAsmList().Name();
-			break;
-		case FILE_TYPE_CPP:
-			m_fs << GetProjSrcList().Name();
-			break;
-		case FILE_TYPE_HPP:
-			m_fs << GetProjIncList().Name();
-			break;
-		case FILE_TYPE_RES:
-			m_fs << GetProjResList().Name();
-			break;
-		case FILE_TYPE_DEF:
-			m_fs << GetProjDefList().Name();
-			break;
-		default:
-			m_fs << CMAKE_FIILE_TO_STR(FILE_TYPE_DEF);
-			break;
-	}
+	m_fs << GetCMakeVarName(FileType);
 	m_fs << std::endl;
+	
 	for (iterCppMap = fileMap.cbegin(); iterCppMap != fileMap.cend(); iterCppMap++) {
 		m_fs << "    " << (iterCppMap->first) << std::endl;
 	}

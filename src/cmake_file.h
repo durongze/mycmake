@@ -63,6 +63,9 @@ public:
 	int writeStaticLib();
 	int writeSharedLib();
 	int writeApp();
+	std::string CMakeFile::GetExtName(int FileType);
+
+	std::string CMakeFile::GetCMakeVarName(int FileType);
 private:
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::vector<std::string> &dirList, const std::string& extName);
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::string& subDir, const std::string& extName);
