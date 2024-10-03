@@ -9,6 +9,7 @@
 #include <vector>
 
 #define CMAKE_FIILE_TO_STR(X)   #X
+#define CMAKE_DIR_SEP           "/"
 
 class CMakeVar {
 public:
@@ -17,6 +18,8 @@ public:
 	~CMakeVar();
 	std::string Name()const;
 	std::string Value()const;
+public:
+	friend bool operator<(const CMakeVar& my, const CMakeVar& other) ;
 private:
 	std::string m_varName;
 };
@@ -44,6 +47,8 @@ private:
 	CMakeVar GetProjName();
 	CMakeVar GetProjBinDir();
 	CMakeVar GetProjTopDir();
+	CMakeVar GetProjIncDirSet();
+	CMakeVar GetProjLibDirSet();
 	CMakeVar GetProjAsmList();
 	CMakeVar GetProjHdrList();
 	CMakeVar GetProjSrcList();
@@ -58,26 +63,31 @@ private:
 	CMakeVar GetProjAppDepLib();
 	CMakeVar GetProjAppDefs();
 public:
+	int writeOptList(const std::string& optionList, const std::string& platform);
+	int writeOptionLists();
+	int writeSetList(const CMakeVar& cmakeVar, const std::string& cmakeValue);
 	int writeSetList(const CMakeVar& cmakeVar, const std::map<std::string, int>& fileMap);
 	int writeRootDir();
-	int writeFileList();
+	int writeFileList(const std::map<std::string, int>& dirMap);
 	int writeStaticLib();
 	int writeSharedLib();
 	int writeApp();
-	
-	std::string CMakeFile::GetCMakeDirVarSuffix(int FileType);
+	int writeInstall();
+	std::string GetCMakeDirVarSuffix(int FileType);
 
-	std::string CMakeFile::GetExtName(int FileType);
+	std::string GetExtName(int FileType);
 
-	std::string CMakeFile::GetCMakeVarName(int FileType);
+	std::string GetCMakeVarName(int FileType);
 private:
-	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::vector<std::string> &dirList, const std::string& extName);
+	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::map<std::string, int> &dirList, const std::string& extName);
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::string& subDir, const std::string& extName);
 private:
 	std::fstream m_fs;
     std::string  m_name;
 	CMakeVar m_ProjName;
 	std::map<CMakeVar, int> m_allDirFilter;
+	std::map<std::string, int> m_dirMap;
+	std::map<CMakeVar, std::string> m_platformOpts;
 };
 
 #endif

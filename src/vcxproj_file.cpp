@@ -151,6 +151,7 @@ int MatchPreprocessorDefinitions(std::string Name, std::string AttrName)
 
 TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name )
 {
+	std::string platform;
 	if (ItemDefinitionGroup == NULL) return NULL;
 	TiXmlElement* ClCompile = NULL;
 	TiXmlElement* ClCompileChild = NULL;
@@ -162,7 +163,9 @@ TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* I
 		}
 		if (MatchPreprocessorDefinitions(ClCompileChild->Value(), "")) {
 			DumpXmlNode(std::cout, ClCompileChild);
-			cmakeFile.write(ClCompileChild->GetText());
+			GetFirstAttrValue(ItemDefinitionGroup, platform);
+			// cmakeFile.write(ClCompileChild->GetText());
+			cmakeFile.writeOptList(ClCompileChild->GetText(), platform);
 		}
 	}
 	return ItemDefinitionGroup;
@@ -345,6 +348,7 @@ void DumpAllGroup(CMakeFile& cmakeFile, TiXmlElement* root)
 		Find_ImportGroup(root);
 		Find_ItemDefinitionGroup(cmakeFile, root);
 		Find_ItemGroup(cmakeFile, root);
+		cmakeFile.writeCMakeLists();
 	}
 }
 

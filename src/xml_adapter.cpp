@@ -4,6 +4,18 @@
 #include "xml_adapter.h"
 #include "my_sys.h"
 
+void GetFirstAttrValue(TiXmlElement* name, std::string &platform)
+{
+	TiXmlAttribute* attr;
+	if (NULL != name)
+	{
+		attr = name->FirstAttribute();
+		if (attr) {
+			platform = attr->Value();
+		}
+	}
+}
+
 void DumpXmlNode(std::ostream& os, TiXmlElement* name)
 {
 	TiXmlAttribute* attr;
