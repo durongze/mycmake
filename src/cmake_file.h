@@ -15,8 +15,8 @@ public:
 	CMakeVar(const char* varName);
 	CMakeVar(const std::string& varName);
 	~CMakeVar();
-	std::string Name();
-	std::string Value();
+	std::string Name()const;
+	std::string Value()const;
 private:
 	std::string m_varName;
 };
@@ -58,11 +58,15 @@ private:
 	CMakeVar GetProjAppDepLib();
 	CMakeVar GetProjAppDefs();
 public:
+	int writeSetList(const CMakeVar& cmakeVar, const std::map<std::string, int>& fileMap);
 	int writeRootDir();
 	int writeFileList();
 	int writeStaticLib();
 	int writeSharedLib();
 	int writeApp();
+	
+	std::string CMakeFile::GetCMakeDirVarSuffix(int FileType);
+
 	std::string CMakeFile::GetExtName(int FileType);
 
 	std::string CMakeFile::GetCMakeVarName(int FileType);

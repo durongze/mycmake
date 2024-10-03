@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cctype>
 #include <strstream>
+#include <regex>
 
 #include "vcxproj_path.h"
 #include "my_fs.h"
@@ -19,14 +20,14 @@ CMakeVar::~CMakeVar() {
 
 }
 
-std::string CMakeVar::Name()
+std::string CMakeVar::Name()const
 {
 	std::string str;
 	str += m_varName;
 	return str;
 }
 
-std::string CMakeVar::Value()
+std::string CMakeVar::Value()const
 {
 	std::string str;
 	str += "${";
@@ -74,6 +75,33 @@ std::string ToLowerStr(std::string str)
 	std::transform(str.begin(), str.end(), str.begin(),
 		[](unsigned char c) { return std::toupper(c); });
 	return str;
+}
+
+std::string CMakeFile::GetCMakeDirVarSuffix(int FileType)
+{
+	std::strstream fs;
+	switch (FileType) {
+	case FILE_TYPE_ASM:
+		fs << "_ASMS";
+		break;
+	case FILE_TYPE_CPP:
+		fs << "_CPPS";
+		break;
+	case FILE_TYPE_HPP:
+		fs << "_HPPS";
+		break;
+	case FILE_TYPE_RES:
+		fs << "_RES";
+		break;
+	case FILE_TYPE_DEF:
+		fs << "_DEFAULT";
+		break;
+	default:
+		fs << "_ERROR";
+		break;
+	}
+	fs << std::ends;
+	return fs.str();
 }
 
 std::string CMakeFile::GetExtName(int FileType)
@@ -130,26 +158,51 @@ std::string CMakeFile::GetCMakeVarName(int FileType)
 	return fs.str();
 }
 
-int CMakeFile::write(const std::map<std::string, int>& fileMap, int FileType)
+int CMakeFile::writeSetList(const CMakeVar &cmakeVar, const std::map<std::string, int>& fileMap)
 {
 	std::map<std::string, int>::const_iterator iterCppMap;
+	m_fs.open(m_name, std::ios::out | std::ios::app);
+	m_fs << "set (";
+
+	m_fs << cmakeVar.Name();
+	m_fs << std::endl;
+	for (iterCppMap = fileMap.cbegin(); iterCppMap != fileMap.cend(); iterCppMap++) {
+		m_fs << "    " << (iterCppMap->first) << std::endl;
+	}
+	
+	m_fs << ")" << std::endl;
+	m_fs.close();
+	return 0;
+}
+
+int CMakeFile::write(const std::map<std::string, int>& fileMap, int FileType)
+{
+
 	std::map<std::string, int> dirMap;
+	std::map<std::string, std::map<std::string, int> > dirFileFilter;
+	std::map<std::string, std::map<std::string, int> >::const_iterator iterDirFileFilter;
 	if (fileMap.size() == 0) {
 		return 0;
 	}
 
-	return CheckFileList(fileMap, GetExtName(FileType));
-
-	m_fs.open(m_name, std::ios::out | std::ios::app);
-	m_fs << "set (";
-	m_fs << GetCMakeVarName(FileType);
-	m_fs << std::endl;
-	
-	for (iterCppMap = fileMap.cbegin(); iterCppMap != fileMap.cend(); iterCppMap++) {
-		m_fs << "    " << (iterCppMap->first) << std::endl;
+	if (true) {
+		CheckFileList(fileMap, GetExtName(FileType), dirFileFilter);
+		for (iterDirFileFilter = dirFileFilter.cbegin(); iterDirFileFilter != dirFileFilter.cend(); iterDirFileFilter++) {
+			std::string cmake_dir_var = "FILTER_";
+			std::regex dir_cur_regex(DIR_CUR_REGEX);
+			std::regex dir_sep_regex(DIR_SEP_REGEX);
+			cmake_dir_var = cmake_dir_var + iterDirFileFilter->first;
+			cmake_dir_var = std::regex_replace(cmake_dir_var, dir_sep_regex, "_");
+			cmake_dir_var = std::regex_replace(cmake_dir_var, dir_cur_regex, "");
+			cmake_dir_var = cmake_dir_var + GetCMakeDirVarSuffix(FileType);
+			cmake_dir_var = std::regex_replace(cmake_dir_var, std::regex("__"), "_");
+			writeSetList(ToUpperStr(cmake_dir_var), iterDirFileFilter->second);
+		}
 	}
-	m_fs << ")" << std::endl;
-	m_fs.close();
+	else {
+		writeSetList (GetCMakeVarName(FileType), fileMap);
+	}
+
 	return 0;
 }
 

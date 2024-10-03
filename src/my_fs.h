@@ -8,6 +8,8 @@
 #ifdef WIN32
 
 #define DIR_SEP "\\"
+#define DIR_SEP_REGEX "\\\\"
+#define DIR_CUR_REGEX "\\."
 
 #ifdef MY_MRP_IO
 #define MRP_API __declspec(dllexport)

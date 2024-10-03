@@ -31,7 +31,7 @@ int RecordAllDirByFiles(const std::map<std::string, int>& fileMap, std::map<std:
 	return 0;
 }
 
-int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::string &filePath, const std::string &fileExt, std::ostream& os)
+int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::string &filePath, const std::string &fileExt, std::map<std::string, int>& fileFilter, std::ostream& os)
 {
 	std::vector<std::string> files;
 	std::vector<std::string>::iterator iterFile;
@@ -59,6 +59,7 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 			iterFileMap++;
 			fileMapNo++;
 		} else if (ret < 0) {
+			fileFilter[fileCur] = iterFileAll->second;
 			os << fileAllNo << " FileAll[" << iterFileAll->second << "]:" << fileCur << std::endl;
 			iterFileAll++;
 			fileAllNo++;
@@ -69,6 +70,8 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 		}
 	}
 	while (iterFileAll != fileAll.end()) {
+		std::string fileCur = iterFileAll->first.substr(dbgRootDir.length(), iterFileAll->first.length() - dbgRootDir.length());
+		fileFilter[fileCur] = iterFileAll->second;
 		os << "FileAll[" << iterFileAll->second << "]:" << iterFileAll->first << std::endl;
 		iterFileAll++;
 	}
@@ -79,7 +82,7 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 	return 0;
 }
 
-int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt)
+int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt, std::map<std::string, std::map<std::string, int> > &dirFileFilter)
 {
 	std::map<std::string, int> dirMap;
 	std::map<std::string, std::map<std::string, int> > dirFile;
@@ -88,7 +91,7 @@ int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& 
 	DumpStrMap(dirMap, fileExt, std::cout);
 	for (iterdirMap = dirMap.cbegin(); iterdirMap != dirMap.cend(); iterdirMap++)
 	{
-		CompareFileNameByPath(dirFile[iterdirMap->first], iterdirMap->first, fileExt);
+		CompareFileNameByPath(dirFile[iterdirMap->first], iterdirMap->first, fileExt, dirFileFilter[iterdirMap->first]);
 	}
 
 	return 0;
