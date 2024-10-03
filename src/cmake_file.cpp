@@ -196,7 +196,12 @@ int CMakeFile::write(const std::map<std::string, int>& fileMap, int FileType)
 			cmake_dir_var = std::regex_replace(cmake_dir_var, dir_cur_regex, "");
 			cmake_dir_var = cmake_dir_var + GetCMakeDirVarSuffix(FileType);
 			cmake_dir_var = std::regex_replace(cmake_dir_var, std::regex("__"), "_");
-			writeSetList(ToUpperStr(cmake_dir_var), iterDirFileFilter->second);
+			CMakeVar curDirCMakeVar = ToUpperStr(cmake_dir_var);
+			writeSetList(curDirCMakeVar, iterDirFileFilter->second);
+			
+			m_allDirFilter[curDirCMakeVar] = FileType;
+
+
 		}
 	}
 	else {

@@ -77,6 +77,7 @@ private:
 	std::fstream m_fs;
     std::string  m_name;
 	CMakeVar m_ProjName;
+	std::map<CMakeVar, int> m_allDirFilter;
 };
 
 #endif
