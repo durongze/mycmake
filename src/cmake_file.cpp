@@ -41,11 +41,11 @@ bool operator<(const CMakeVar& my, const CMakeVar& other)
 	return my.m_varName < other.m_varName;
 }
 
-CMakeFile::CMakeFile(const char* filename, const char* projname):m_name(filename), m_ProjName(projname) {
+CMakeFile::CMakeFile(const char* filename, const char* projname):m_name(filename), m_ProjName(ToUpperStr(std::string(projname))) {
 
 }
 
-CMakeFile::CMakeFile(const std::string& filename, const std::string& projname) :m_name(filename), m_ProjName(projname) {
+CMakeFile::CMakeFile(const std::string& filename, const std::string& projname) :m_name(filename), m_ProjName(ToUpperStr(projname)) {
 
 }
 

@@ -11,6 +11,9 @@
 #define CMAKE_FIILE_TO_STR(X)   #X
 #define CMAKE_DIR_SEP           "/"
 
+std::string ToLowerStr(std::string str);
+std::string ToUpperStr(std::string str);
+
 class CMakeVar {
 public:
 	CMakeVar(const char* varName);
