@@ -14,7 +14,7 @@ void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, 
 	}
 }
 
-int RecordAllDirByFiles(const std::map<std::string, int>& fileMap, std::map<std::string, int>& dirMap)
+int RecordAllDirByFiles(const std::map<std::string, int>& fileMap, std::map<std::string, int>& dirMap, std::map<std::string, std::map<std::string, int> >& dirFile)
 {
 	std::map<std::string, int>::const_iterator iterFileMap;
 	std::string dirName;
@@ -25,6 +25,7 @@ int RecordAllDirByFiles(const std::map<std::string, int>& fileMap, std::map<std:
 		dirLen = iterFileMap->first.rfind(DIR_SEP);
 		dirName = iterFileMap->first.substr(0, dirLen);
 		dirMap[dirName] = dirIdx;
+		dirFile[dirName][iterFileMap->first] = iterFileMap->second;
 	}
 
 	return 0;
@@ -39,9 +40,12 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 	std::map<std::string, int>::const_iterator iterFileMap;
 	int ret = 0;
 	int fileIdx = 0;
+	int fileAllNo = 0;
+	int fileMapNo = 0;
 	std::string dbgRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\";
 	ret = ReadFileByDir(dbgRootDir + filePath, fileExt, files);
 
+	os << __FUNCTION__ << "  DIR:" << filePath << std::endl;
 	for (iterFile = files.begin(); iterFile != files.end(); iterFile++) {
 		fileAll[*iterFile] = fileIdx++;
 	}
@@ -51,11 +55,13 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 		std::string fileCur = iterFileAll->first.substr(dbgRootDir.length(), iterFileAll->first.length() - dbgRootDir.length());
 		ret = strcmp(fileCur.c_str(), iterFileMap->first.c_str());
 		if (ret > 0) {
-			os << "FileMap[" << iterFileMap->second << "]:" << iterFileMap->first << std::endl;
+			os << fileMapNo << " FileMap[" << iterFileMap->second << "]:" << iterFileMap->first << std::endl;
 			iterFileMap++;
+			fileMapNo++;
 		} else if (ret < 0) {
-			os << "FileAll[" << iterFileAll->second << "]:" << iterFileAll->first << std::endl;
+			os << fileAllNo << " FileAll[" << iterFileAll->second << "]:" << fileCur << std::endl;
 			iterFileAll++;
+			fileAllNo++;
 		}
 		else {
 			iterFileAll++;
@@ -76,12 +82,13 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt)
 {
 	std::map<std::string, int> dirMap;
+	std::map<std::string, std::map<std::string, int> > dirFile;
 	std::map<std::string, int>::const_iterator iterdirMap;
-	RecordAllDirByFiles(fileMap, dirMap);
+	RecordAllDirByFiles(fileMap, dirMap, dirFile);
 	DumpStrMap(dirMap, fileExt, std::cout);
 	for (iterdirMap = dirMap.cbegin(); iterdirMap != dirMap.cend(); iterdirMap++)
 	{
-		CompareFileNameByPath(fileMap, iterdirMap->first, fileExt);
+		CompareFileNameByPath(dirFile[iterdirMap->first], iterdirMap->first, fileExt);
 	}
 
 	return 0;

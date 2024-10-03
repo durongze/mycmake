@@ -84,7 +84,7 @@ std::string CMakeFile::GetExtName(int FileType)
 		fs << ".asm";
 		break;
 	case FILE_TYPE_CPP:
-		fs << ".cpp";
+		fs << ".c*";
 		break;
 	case FILE_TYPE_HPP:
 		fs << ".h";
