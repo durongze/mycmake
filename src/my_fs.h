@@ -23,6 +23,7 @@
 #define MRP_API
 #endif
 
+std::string GetAbsPathByName(const std::string& fileName);
 int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::string>& files);
 
 #ifdef __cplusplus

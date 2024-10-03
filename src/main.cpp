@@ -8,12 +8,15 @@
 #include <regex>
 #include <iostream>
 #include <iomanip>
+#include <filesystem>
 
 #include "tinyxml.h"
 #include "xml_adapter.h"
 #include "my_sys.h"
+#include "my_fs.h"
 #include "cmake_file.h"
 #include "vcxproj_file.h"
+#include "vcxproj_path.h"
 
 inline wchar_t* AnsiToUnicode(const char* szStr)
 {
@@ -105,6 +108,12 @@ int AppMain(int argc, char* argv[])
 		std::cin >> fileVcxproj;
         return -2;
     }
+	else {
+		// SetVcxprojWorkDir(GetAbsPathByName(std::string(argv[1])));
+		std::filesystem::path  abs_path = std::filesystem::absolute(std::string(argv[1]));
+		SetVcxprojWorkDir(abs_path.string());
+	}
+
     return ParseProjMain(fileVcxproj, cmake_file);
 }
 

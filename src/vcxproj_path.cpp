@@ -4,6 +4,13 @@
 
 #include <iostream>
 
+std::string dbgRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\";
+
+void SetVcxprojWorkDir(const std::string& rootDir)
+{
+	dbgRootDir = rootDir;
+}
+
 void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, std::ostream &os)
 {
 	std::map<std::string, int>::iterator iterStrMap;
@@ -42,7 +49,7 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 	int fileIdx = 0;
 	int fileAllNo = 0;
 	int fileMapNo = 0;
-	std::string dbgRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\";
+
 	ret = ReadFileByDir(dbgRootDir + filePath, fileExt, files);
 
 	os << __FUNCTION__ << "  DIR:" << filePath << std::endl;

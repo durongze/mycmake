@@ -11,7 +11,8 @@
 
 #ifdef _WIN32
 #include <io.h>
-
+#include <windows.h>
+#include <iostream>
 int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::string>& files)
 {
     struct _finddata_t s_file;
@@ -36,6 +37,22 @@ int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::str
     _findclose(h_file);
     return 0;
 }
+
+std::string GetAbsPathByName(const std::string& fileName)
+{
+    char absolutePath[MAX_PATH];
+
+    // 获取绝对路径
+    int len = GetFullPathName((LPTSTR)fileName.c_str(), MAX_PATH, (LPTSTR)absolutePath, NULL);
+    if (len > 0 && len < MAX_PATH) {
+        std::cout << "Absolute path: " << absolutePath << std::endl;
+    }
+    else {
+        std::cerr << "Failed to get absolute path." << std::endl;
+    }
+    return std::string(absolutePath);
+}
+
 #else
 #include <dirent.h>
 
@@ -101,6 +118,22 @@ int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::str
     closedir(handle);
     return 0;
 }
+
+std::string GetAbsPathByName(std::string fileName)
+{
+    char absolutePath[PATH_MAX];
+
+    char* resolvedPath = realpath(fileName.c_str(), absolutePath);
+    if (resolvedPath != nullptr) {
+        std::cout << "Absolute path: " << resolvedPath << std::endl;
+    }
+    else {
+        std::cerr << "Failed to get absolute path." << std::endl;
+    }
+
+    return std::string(absolutePath);
+}
+
 #endif
 
 void fixAppName(std::string& appName, char src_ch, char dst_ch)

@@ -366,6 +366,7 @@ int ParseProjMain(std::string& fileVcxproj, std::string& fileCmake)
 		std::cout << fileVcxproj << std::endl;
 		return -1;
 	}
+
 	root = doc.RootElement();
 	// DumpProjectConfiguration(root);
 	DumpAllGroup(CMakeFile(fileCmake), root);

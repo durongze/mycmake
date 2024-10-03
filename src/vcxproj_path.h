@@ -6,6 +6,8 @@
 #include <vector>
 #include <iostream>
 
+void SetVcxprojWorkDir(const std::string& rootDir);
+
 void DumpStrMap(std::map<std::string, int>& strMap, const std::string& fileExt, std::ostream& os);
 
 int RecordAllDirByFiles(const std::map<std::string, int> &fileMap, std::map<std::string, int>& dirMap, std::map<std::string, std::map<std::string, int> >& dirFile);
