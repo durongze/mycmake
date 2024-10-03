@@ -1,14 +1,20 @@
 @rem set VSCMD_DEBUG=2
+@rem %comspec% /k "F:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
 
-call :DetectVsPath VisualStudioCmd
+@rem set VSCMD_DEBUG=2
+
+call :DetectVsPath     VisualStudioCmd
+call :DetectProgramDir ProgramDir
+
+echo ProgramDir=%ProgramDir%
 
 set old_sys_include="%include%"
 set old_sys_lib="%lib%"
 set old_sys_path="%path%"
 
-set ProgramDir=F:\program
+set PERL5LIB=%PERL5LIB%
 set PerlPath=%ProgramDir%\Perl\bin
-set NASMPath=%ProgramDir%\nasm
+set NASMPath=%ProgramDir%\nasm\bin
 set CMakePath=%ProgramDir%\cmake\bin
 set PythonHome=%ProgramDir%\python
 set PATH=%NASMPath%;%PerlPath%;%CMakePath%;%PythonHome%;%PATH%
@@ -26,23 +32,55 @@ call :ShowProjEnv
 
 set SystemBinDir=.\
 
+call %VisualStudioCmd% x86
+
 set BuildType=Release
 set ProjName=
 set build_mrp_ext=%CurDir%\mythroad\build_mrp_ext.bat
 
 call :get_suf_sub_str %ProjDir% \ ProjName
 echo ProjName %ProjName%
-CALL %VisualStudioCmd%
 
 set BuildDir=BuildSrc
-@rem copy srcCMakeLists.txt CMakeLists.txt /y
-call :CompileProject %BuildDir% %BuildType% %ProjName%
+@rem set CMakeListsFile=srcCMakeLists.txt
 
 @rem set BuildDir=BuildLib
-@rem copy libCMakeLists.txt CMakeLists.txt /y
-@rem call :CompileProject %BuildDir% %BuildType% %ProjName%
+set CMakeListsFile=LibCMakeLists.txt
+
+if exist %CMakeListsFile% (
+    copy %CMakeListsFile% CMakeLists.txt /y
+)
+call :CompileProject %BuildDir% %BuildType% %ProjName% "%HomeDir%"
 
 pause
+goto :eof
+
+:DetectProgramDir
+    setlocal EnableDelayedExpansion
+    @rem SkySdk\VS2005\VC
+    set SkySdkDiskSet=C;D;E;F;G;
+    set CurProgramDir=
+    set idx=0
+    call :color_text 2f " +++++++++++++++++++ DetectProgramDir +++++++++++++++++++++++ "
+    for %%i in (%SkySdkDiskSet%) do (
+        set /a idx+=1
+        for /f "tokens=1-2 delims=|" %%B in ("programs|program") do (
+            set CurProgramDir=%%i:\%%B
+            echo [!idx!] !CurProgramDir!
+            if exist !CurProgramDir!\SkySdk (
+                goto :DetectProgramDirBreak
+            )
+            set CurProgramDir=%%i:\%%C
+            echo [!idx!] !CurProgramDir!
+            if exist !CurProgramDir!\SkySdk (
+                goto :DetectProgramDirBreak
+            )
+        )
+    )
+    :DetectProgramDirBreak
+    set ProgramDir=!CurProgramDir!
+    call :color_text 2f " ------------------- DetectProgramDir ----------------------- "
+    endlocal & set %~1=%ProgramDir%
 goto :eof
 
 :CheckLibInDir
@@ -81,41 +119,41 @@ goto :eof
 :DetectVsPath
     setlocal EnableDelayedExpansion
     set VsBatFileVar=%~1
+    call :color_text 2f "++++++++++++++++++ DetectVsPath +++++++++++++++++++++++"
+    set VSDiskSet=C;D;E;F;G;
+    set AllProgramsPathSet=program
+    set AllProgramsPathSet=%AllProgramsPathSet%;programs
+    set AllProgramsPathSet=%AllProgramsPathSet%;"Program Files"
+    set AllProgramsPathSet=%AllProgramsPathSet%;"Program Files (x86)"
+    set VCPathSet=%VCPathSet%;"Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build"
+    set VCPathSet=%VCPathSet%;"Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build"
+    set VCPathSet=%VCPathSet%;SkySdk\VS2005\VC
+    set VCPathSet=%VCPathSet%;"Microsoft Visual Studio 8\VC"
+    set VCPathSet=%VCPathSet%;"Microsoft Visual Studio 12.0\VC\bin"
+    set VCPathSet=%VCPathSet%;"Microsoft Visual Studio 14.0\VC\bin"
+    set VCPathSet=%VCPathSet%;"Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build"
 
-    set VisualStudioCmdSet="F:\Program Files\Microsoft Visual Studio 8\VC\vcvarsall.bat"
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 8\VC\vcvarsall.bat"
-
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\vcvars32.bat"
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\amd64\vcvars64.bat"
-
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\vcvars32.bat"
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\amd64\vcvars64.bat"
-
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-    
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars32.bat"
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-    
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"E:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
-    
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars32.bat"
-    set VisualStudioCmdSet=%VisualStudioCmdSet%;"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat"
-    call :color_text 2f "+++++++++++++++++++DetectVsPath+++++++++++++++++++++++"
-    set CurBat=
-    set idx=0
-    for %%i in (%VisualStudioCmdSet%) do (
-        set /a idx+=1
-        set CurBat=%%i
-        echo [!idx!] !CurBat!
-        if exist !CurBat! (
-            goto DetectVsPathBreak
+    set idx_a=0
+    for %%C in (%VCPathSet%) do (
+        set /a idx_a+=1
+        set idx_b=0
+        for %%B in (!AllProgramsPathSet!) do (
+            set /a idx_b+=1
+            set idx_c=0
+            for %%A in (!VSDiskSet!) do (
+                set /a idx_c+=1
+                set CurBatFile=%%A:\%%B\%%C\vcvarsall.bat
+                echo [!idx_a!][!idx_b!][!idx_c!] !CurBatFile!
+                if exist !CurBatFile! (
+                    goto DetectVsPathBreak
+                )
+            )
         )
     )
     :DetectVsPathBreak
-    echo Use:%CurBat%
+    echo Use:%CurBatFile%
     call :color_text 2f "--------------------DetectVsPath-----------------------"
-    endlocal & set "%~1=%CurBat%"
+    endlocal & set "%~1=%CurBatFile%"
 goto :eof
 
 :CompileProject
@@ -123,14 +161,21 @@ goto :eof
     set BuildDir=%~1
     set BuildType=%~2
     set ProjName=%~3
-
+    set LibHomeDir=%~4
+    call :color_text 2f "+++++++++++++++++++CompileProject+++++++++++++++++++++++"
     if not exist %BuildDir% (
         mkdir %BuildDir%
     ) 
     if not exist %BuildDir%\%BuildType% (
         mkdir %BuildDir%\%BuildType%\
     )
-    @rem for /f %%i in ('dir /s /b "out\windows\*.dll"') do (   copy %%i %BuildDir%\%BuildType%\ )
+    if exist "%LibHomeDir%" (
+        echo search dll ....
+        for /f %%i in ('dir /s /b "%LibHomeDir%\*.dll"') do (
+            copy %%i %BuildDir%\%BuildType%\ 
+            copy %%i %BuildDir%\%BuildType%\..
+        )
+    )
     pushd %BuildDir%
         @rem del * /q /s
         @rem cmake .. -G"Visual Studio 16 2019" -A Win64
@@ -139,8 +184,9 @@ goto :eof
         cmake .. -DDYZ_DBG=ON -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ProgramDir%\%ProjName%
         @rem call :ResetSystemEnv
         @rem cmake --build .  --config %BuildType%  --target %ProjName%
-        cmake --build . -j16  --config %BuildType% --target  %ProjName%
+        cmake --build . -j16  --config %BuildType% --target %ProjName%
     popd
+    call :color_text 2f " -------------------- CompileProject ----------------------- "
     endlocal
 goto :eof
 
@@ -224,8 +270,15 @@ goto :eof
     set loc_inc=%2
     set loc_lib=%3
     set loc_bin=%4
-
-    call :gen_all_env %software_dir% %HomeDir% loc_inc loc_lib loc_bin cmake_inc cmake_lib cmake_path
+    if not exist %software_dir% (
+        echo software_dir '%software_dir%' doesn't exist!
+        goto :eof
+    )
+    if not exist %HomeDir% (
+        echo HomeDir '%HomeDir%' doesn't exist!
+        goto :eof
+    )
+    call :gen_all_env_by_dir %software_dir% %HomeDir% loc_inc loc_lib loc_bin cmake_inc cmake_lib cmake_path
     set all_inc=%loc_inc%;%include%;%loc_dir%\include;
     set all_lib=%loc_lib%;%lib%;%loc_dir%\lib;%loc_dir%\bin;
     set all_bin=%loc_bin%;%path%;%loc_dir%\bin;
@@ -269,6 +322,12 @@ goto :eof
     reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" /v "KitsRoot10"
     @rem reg delete "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" /v KitsRoot10 
     @rem reg add    "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows Kits\Installed Roots" /v KitsRoot10         /f /t REG_SZ /d "D:\Program Files (x86)\Windows Kits\10\"
+
+    echo "C:\Program Files (x86)\Microsoft SDKs\Windows"
+    echo "C:\Program Files (x86)\Windows Kits"
+    echo "C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\Platforms\Win32\PlatformToolsets\v80\Microsoft.Cpp.Win32.v80.props"
+    reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\8.0\Setup\VC" /v "ProductDir"
+    reg query "HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\VisualStudio\8.0\Setup\VS" /v "ProductDir"
     call :color_text 2f "--------------------ShowVS2022InfoOnWin10-----------------------"
     endlocal
 goto :eof
@@ -293,6 +352,118 @@ goto :eof
     echo .
 goto :eof
 
+:find_lib_by_func
+    setlocal ENABLEDELAYEDEXPANSION
+    set lib_dir=%1
+    set func_name=%~2
+    call:color_text 2f "++++++++++++++find_lib_by_func++++++++++++++"
+    set idx=0
+    pushd %lib_dir%
+        for /f %%i in (' dir /b  ') do (
+            set /a idx+=1
+            set lib_file=%%i
+            echo [!idx!]lib_file:!lib_file! 
+            call :search_func_in_lib "!lib_file!"  "%func_name%"
+        )
+    popd
+    call:color_text 9f "--------------find_lib_by_func--------------"
+    endlocal
+goto :eof
+
+:search_func_in_lib
+    setlocal ENABLEDELAYEDEXPANSION
+    set lib_name=%1
+    set func_name=%~2
+    if "%func_name%" == "" (
+        dumpbin /EXPORTS %lib_name%
+        dumpbin /SYMBOLS %lib_name%
+        strings %lib_name%
+    ) else (
+        dumpbin /SYMBOLS %lib_name%  | grep %func_name%
+        strings %lib_name% |  findstr /i "%func_name%"
+    )
+    endlocal
+goto :eof
+
+:show_lib_info
+    setlocal ENABLEDELAYEDEXPANSION
+    set lib_name=%1
+    set spec_obj=%~2
+    set sym_text=%lib_name%_sym.txt
+    call:color_text 2f "++++++++++++++show_lib_info++++++++++++++"
+    echo %0 %lib_name%
+    @rem objdump -S %lib_name% | grep -C 5 "_open"
+    lib /list %lib_name% > %sym_text%
+    lib /list:%sym_text% %lib_name%
+    echo %0 %lib_name%  %sym_text%
+    set idx=0
+    @rem for /f "tokens=4 delims=," %%i in ( %sym_text% ) do (
+    for /f %%i in ( %sym_text% ) do (
+        set /a idx+=1
+        set obj_file=%%i
+        echo [!idx!]obj_file:!obj_file!  lib_name:!lib_name!  spec_obj: !spec_obj!
+        if "!obj_file!" == "!spec_obj!" (
+            lib !lib_name! /extract:!obj_file!
+        )
+    )
+    call:color_text 9f "--------------show_lib_info--------------"
+    endlocal
+goto :eof
+
+:show_obj_info
+    setlocal ENABLEDELAYEDEXPANSION
+    set spec_obj=%~1
+
+    call:color_text 2f "++++++++++++++show_obj_info++++++++++++++"
+    echo %0 %spec_obj%
+    set idx=0
+    :GOON
+    for /f "delims=\, tokens=1,*" %%i in ("%spec_obj%") do (
+        set /a idx+=1
+        echo [!idx!]%%i %%j
+        set spec_obj=%%j
+        set file_name=%%i
+        echo [!idx!]file_name:!file_name! spec_obj: !spec_obj!
+        if exist !spec_obj! (
+            dumpbin /all !spec_obj! > !spec_obj!_sym.txt
+            dumpbin /disasm !spec_obj! > !spec_obj!_asm.txt 
+            goto :GOON_END
+        )
+        goto GOON
+    )
+    :GOON_END
+    call:color_text 9f "--------------show_obj_info--------------"
+    endlocal
+goto :eof
+
+:append_obj_to_lib
+    setlocal ENABLEDELAYEDEXPANSION
+    lib simulator.lib os_adapter.obj
+    lib /out:simulator_new.lib simulator.lib os_adapter.obj
+    @rem lib simulator.lib /remove os_adapter.obj
+    endlocal
+goto :eof
+
+:MakeDir
+    setlocal EnableDelayedExpansion
+    set DirName="%~1"
+    if not exist %DirName% (
+        mkdir %DirName%
+    )
+    endlocal
+goto :eof
+
+:get_path_by_file
+    setlocal EnableDelayedExpansion
+    set myfile=%1
+    set mypath=%~dp1
+    set myname=%~n1
+    set myext=%~x1
+    call :color_text 2f "++++++++++++++++++ get_path_by_file ++++++++++++++++++++++++"
+    echo !mypath! !myname! !myext!
+    call :color_text 2f "-------------------- get_path_by_file -----------------------"
+    endlocal & set %~2=%mypath%&set %~3=%myname%&set %~4=%myext%
+goto :eof
 
 :get_dir_by_tar
     setlocal ENABLEDELAYEDEXPANSION
@@ -359,32 +530,75 @@ goto :eof
     endlocal & set %~3=%DstDirWithHome%
 goto :eof
 
-:gen_all_env
+:gen_all_env_by_file
     setlocal ENABLEDELAYEDEXPANSION
-    set tools_dir="%~1"
+    set thridparty_dir="%~1"
     set home_dir="%~2"
     set DstDirWithHome=
-    call :color_text 2f "++++++++++++++gen_all_env++++++++++++++"
-    if not exist %tools_dir% (
-        echo Dir '%tools_dir%' doesn't exist!
+    call :color_text 2f "++++++++++++++gen_all_env_by_file++++++++++++++"
+    if not exist %thridparty_dir% (
+        echo Dir '%thridparty_dir%' doesn't exist!
         goto :eof
     )
-    pushd %tools_dir%
+    pushd %thridparty_dir%
         for /f %%i in ( 'dir /b *.tar.* *.zip' ) do (
             set tar_file=%%i
             call :gen_env_by_file !tar_file! !home_dir! DstDirWithHome
-            set inc=!DstDirWithHome!/include;!inc!
-            set lib=!DstDirWithHome!/lib;!lib!
-            set bin=!DstDirWithHome!/bin;!bin!
-            set CMAKE_INCLUDE_PATH=!DstDirWithHome!/include;!CMAKE_INCLUDE_PATH!
-            set CMAKE_LIBRARY_PATH=!DstDirWithHome!/lib;!CMAKE_LIBRARY_PATH!
-            set CMAKE_MODULE_PATH=!DstDirWithHome!/cmake;!CMAKE_MODULE_PATH!
+            set inc=!DstDirWithHome!\include;!inc!
+            set lib=!DstDirWithHome!\lib;!lib!
+            set bin=!DstDirWithHome!\bin;!bin!
+            set CMAKE_INCLUDE_PATH=!DstDirWithHome!\include;!CMAKE_INCLUDE_PATH!
+            set CMAKE_LIBRARY_PATH=!DstDirWithHome!\lib;!CMAKE_LIBRARY_PATH!
+            set CMAKE_MODULE_PATH=!DstDirWithHome!\lib\cmake;!CMAKE_MODULE_PATH!
+            set CMAKE_MODULE_PATH=!DstDirWithHome!\cmake;!CMAKE_MODULE_PATH!
         )
     popd
+    call :color_text 9f "++++++++++++++gen_all_env_by_file++++++++++++++"
     echo inc:%inc%
     echo lib:%lib%
     echo bin:%bin%
-    call :color_text 9f "----------------gen_all_env--------------------"
+    endlocal & set %~3=%inc% & set %~4=%lib% & set %~5=%bin% & set %~6=%CMAKE_INCLUDE_PATH% & set %~7=%CMAKE_LIBRARY_PATH% & set %~8=%CMAKE_MODULE_PATH%
+goto :eof
+
+:gen_env_by_dir
+    setlocal ENABLEDELAYEDEXPANSION
+    set FileDir=%~1
+    set HomeDir=%~2
+    set DstDirWithHome=%3
+
+    call :color_text 9f "++++++++++++++gen_env_by_dir++++++++++++++"
+    set DstDirWithHome=%HomeDir%\%FileDir%
+    echo %0 %zip_file% %DstDirWithHome%
+    endlocal & set %~3=%DstDirWithHome%
+goto :eof
+
+:gen_all_env_by_dir
+    setlocal ENABLEDELAYEDEXPANSION
+    set thridparty_dir="%~1"
+    set home_dir="%~2"
+    set DstDirWithHome=
+    call :color_text 2f "++++++++++++++gen_all_env_by_dir++++++++++++++"
+    if not exist %thridparty_dir% (
+        echo Dir '%thridparty_dir%' doesn't exist!
+        goto :eof
+    )
+    pushd %thridparty_dir%
+        for /f %%i in ( 'dir /b /ad ' ) do (
+            set soft_dir=%%i
+            call :gen_env_by_dir !soft_dir! !home_dir! DstDirWithHome
+            set inc=!DstDirWithHome!\include;!inc!
+            set lib=!DstDirWithHome!\lib;!lib!
+            set bin=!DstDirWithHome!\bin;!bin!
+            set CMAKE_INCLUDE_PATH=!DstDirWithHome!\include;!CMAKE_INCLUDE_PATH!
+            set CMAKE_LIBRARY_PATH=!DstDirWithHome!\lib;!CMAKE_LIBRARY_PATH!
+            set CMAKE_MODULE_PATH=!DstDirWithHome!\lib\cmake;!CMAKE_MODULE_PATH!
+            set CMAKE_MODULE_PATH=!DstDirWithHome!\cmake;!CMAKE_MODULE_PATH!
+        )
+    popd
+    call :color_text 9f "++++++++++++++gen_all_env_by_dir++++++++++++++"
+    echo inc:%inc%
+    echo lib:%lib%
+    echo bin:%bin%
     endlocal & set %~3=%inc% & set %~4=%lib% & set %~5=%bin% & set %~6=%CMAKE_INCLUDE_PATH% & set %~7=%CMAKE_LIBRARY_PATH% & set %~8=%CMAKE_MODULE_PATH%
 goto :eof
 
@@ -505,6 +719,7 @@ goto :eof
         )
     )
     echo %0 %mystr% %char_sym% %count% %mysubstr_len%
+    call :color_text 9f "--------------get_suf_sub_str--------------"
     endlocal & set %~3=%substr%
 goto :eof
 

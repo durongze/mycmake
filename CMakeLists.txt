@@ -1,5 +1,8 @@
 project(mycmake)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 #ProjectDependencies->DependsOn->BuildOrder
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/source-charset:utf-8>")
 add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/execution-charset:utf-8>")
