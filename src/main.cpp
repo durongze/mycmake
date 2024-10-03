@@ -111,7 +111,7 @@ int AppMain(int argc, char* argv[])
 	else {
 		// SetVcxprojWorkDir(GetAbsPathByName(std::string(argv[1])));
 		std::filesystem::path  abs_path = std::filesystem::absolute(std::string(argv[1]));
-		SetVcxprojWorkDir(abs_path.string());
+		SetVcxprojWorkDir(abs_path.parent_path().string());
 	}
 
     return ParseProjMain(fileVcxproj, cmake_file);

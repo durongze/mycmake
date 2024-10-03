@@ -8,7 +8,10 @@ std::string dbgRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\";
 
 void SetVcxprojWorkDir(const std::string& rootDir)
 {
-	dbgRootDir = rootDir;
+	int c;
+	dbgRootDir = rootDir + DIR_SEP;
+	std::cout << "RootDir:" << dbgRootDir << std::endl;
+	std::cin >> c;
 }
 
 void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, std::ostream &os)

@@ -1,12 +1,16 @@
 #include "vcxproj_file.h"
+#include <filesystem>
 
-
-std::string GetFileName(const std::string& fileName)
+std::string GetFileName(const std::string& file)
 {
+	std::string fileName;
+	std::filesystem::path vcxprojPath(file);
+	fileName = vcxprojPath.filename().string();
 	std::string extName = ".vcxproj";
 	size_t lenFileName = fileName.length();
 	size_t lenExtName = extName.length();
-	return fileName.substr(0, lenFileName - lenExtName);
+	
+    return fileName.substr(0, lenFileName - lenExtName);
 }
 
 TiXmlElement* Find_NextProjectConfigurations(TiXmlElement* FirstProjectConfigurations, const char* section)
@@ -365,21 +369,21 @@ void DumpAllGroup(CMakeFile& cmakeFile, TiXmlElement* root)
 
 
 
-int ParseProjMain(std::string& fileVcxproj, std::string& fileCmake)
+int ParseProjMain(const std::string& fileVcxproj, const std::string& fileCmake)
 {
 	bool ret;
 	std::string extName = ".vcxproj";
 	TiXmlDocument doc;
 	TiXmlElement* root;
-	fileVcxproj += extName;
-	ret = doc.LoadFile(fileVcxproj.c_str(), TIXML_ENCODING_UTF8);
+	std::string projVcxproj = fileVcxproj + extName;
+	ret = doc.LoadFile(projVcxproj.c_str(), TIXML_ENCODING_UTF8);
 	if (!ret) {
-		std::cout << fileVcxproj << std::endl;
+		std::cout << projVcxproj << std::endl;
 		return -1;
 	}
 
 	root = doc.RootElement();
 	// DumpProjectConfiguration(root);
-	DumpAllGroup(CMakeFile(fileVcxproj+fileCmake), root);
+	DumpAllGroup(CMakeFile(fileCmake, fileVcxproj), root);
 	return 0;
 }

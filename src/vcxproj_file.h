@@ -56,7 +56,7 @@ TiXmlElement* Find_ItemGroup(CMakeFile& cmakeFile, TiXmlElement* Project, const 
 
 void DumpAllGroup(CMakeFile& cmakeFile, TiXmlElement* root);
 
-int ParseProjMain(std::string& fileVcxproj,  std::string& fileCmake);
+int ParseProjMain(const std::string& fileVcxproj, const std::string& fileCmake);
 
 
 #endif

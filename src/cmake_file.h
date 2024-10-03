@@ -35,8 +35,8 @@ public:
 		FILE_TYPE_RES
 	};
 public:
-	CMakeFile(const char* filename);
-	CMakeFile(const std::string& filename);
+	CMakeFile(const char* filename, const char* projname);
+	CMakeFile(const std::string& filename, const std::string& projname);
 	~CMakeFile();
 	int create();
 	int write(const std::string& txt);
