@@ -11,7 +11,7 @@ void SetVcxprojWorkDir(const std::string& rootDir)
 	int c;
 	dbgRootDir = rootDir + DIR_SEP;
 	std::cout << "RootDir:" << dbgRootDir << std::endl;
-	std::cin >> c;
+	// std::cin >> c;
 }
 
 void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, std::ostream &os)
