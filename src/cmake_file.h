@@ -11,8 +11,7 @@
 #define CMAKE_FIILE_TO_STR(X)   #X
 #define CMAKE_DIR_SEP           "/"
 
-std::string ToLowerStr(std::string str);
-std::string ToUpperStr(std::string str);
+
 
 class CMakeVar {
 public:
@@ -68,6 +67,7 @@ private:
 public:
 	int writeOptList(const std::string& optionList, const std::string& platform);
 	int writeOptionLists();
+	int writeFilterList(std::map<std::string, std::map<std::string, int> >& allDirFilter);
 	int writeSetList(const CMakeVar& cmakeVar, const std::string& cmakeValue);
 	int writeSetList(const CMakeVar& cmakeVar, const std::map<std::string, int>& fileMap);
 	int writeRootDir();
@@ -87,10 +87,12 @@ private:
 private:
 	std::fstream m_fs;
     std::string  m_name;
+	
 	CMakeVar m_ProjName;
-	std::map<CMakeVar, int> m_allDirFilter;
-	std::map<std::string, int> m_dirMap;
+	
 	std::map<CMakeVar, std::string> m_platformOpts;
+	std::map<std::string, int> m_dirMap;
+	std::map<std::string, std::map<std::string, int> > m_allDirFilter;
 };
 
 #endif

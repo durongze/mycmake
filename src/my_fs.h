@@ -26,6 +26,9 @@
 std::string GetAbsPathByName(const std::string& fileName);
 int ReadFileByDir(std::string dirName, std::string fileExt, std::vector<std::string>& files);
 
+std::string ToLowerStr(std::string str);
+std::string ToUpperStr(std::string str);
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -34,6 +37,7 @@ extern "C" {
 
 MRP_API int RenameMrpFile(const char* filename, FILE* fp_log, FILE* fp_bat);
 MRP_API int RenameMrpFileByDir(const char* dirname);
+
 
 #ifdef __cplusplus
 #if __cplusplus

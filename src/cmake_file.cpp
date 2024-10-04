@@ -69,20 +69,6 @@ int CMakeFile::write(const std::string& txt)
 	return 0;
 }
 
-std::string ToUpperStr(std::string str)
-{
-	std::transform(str.begin(), str.end(), str.begin(),
-		[](unsigned char c) { return std::toupper(c); });
-	return str;
-}
-
-std::string ToLowerStr(std::string str)
-{
-	std::transform(str.begin(), str.end(), str.begin(),
-		[](unsigned char c) { return std::tolower(c); });
-	return str;
-}
-
 std::string CMakeFile::GetCMakeDirVarSuffix(int FileType)
 {
 	std::strstream fs;
@@ -223,31 +209,15 @@ int CMakeFile::writeSetList(const CMakeVar &cmakeVar, const std::map<std::string
 
 int CMakeFile::write(const std::map<std::string, int>& fileMap, int FileType)
 {
-	std::map<std::string, int> dirMap;
-	std::map<std::string, std::map<std::string, int> > dirFileFilter;
-	std::map<std::string, std::map<std::string, int> >::const_iterator iterDirFileFilter;
+	std::string curDirCMakeVarSuffix;
+
 	if (fileMap.size() == 0) {
 		return 0;
 	}
 
 	if (true) {
-		CheckFileList(fileMap, GetExtName(FileType), dirFileFilter);
-		for (iterDirFileFilter = dirFileFilter.cbegin(); iterDirFileFilter != dirFileFilter.cend(); iterDirFileFilter++) {
-			std::string cmake_dir_var = "FILTER_";
-			std::regex dir_cur_regex(DIR_CUR_REGEX);
-			std::regex dir_sep_regex(DIR_SEP_REGEX);
-			cmake_dir_var = cmake_dir_var + iterDirFileFilter->first;
-			cmake_dir_var = std::regex_replace(cmake_dir_var, dir_sep_regex, "_");
-			cmake_dir_var = std::regex_replace(cmake_dir_var, dir_cur_regex, "");
-			cmake_dir_var = cmake_dir_var + GetCMakeDirVarSuffix(FileType);
-			cmake_dir_var = std::regex_replace(cmake_dir_var, std::regex("__"), "_");
-			CMakeVar curDirCMakeVar = ToUpperStr(cmake_dir_var);
-			writeSetList(curDirCMakeVar, iterDirFileFilter->second);
-			
-			m_allDirFilter[curDirCMakeVar] = FileType;
-
-			m_dirMap[iterDirFileFilter->first] = iterDirFileFilter->second.size();
-		}
+		curDirCMakeVarSuffix = GetCMakeDirVarSuffix(FileType);
+		CheckFileList(fileMap, GetExtName(FileType), curDirCMakeVarSuffix, m_dirMap, m_allDirFilter);
 	}
 	else {
 		writeSetList (GetCMakeVarName(FileType), fileMap);
@@ -266,9 +236,21 @@ int CMakeFile::writeOptionLists()
 	return 0;
 }
 
+int CMakeFile::writeFilterList(std::map<std::string, std::map<std::string, int> > &allDirFilter)
+{
+	std::map<std::string, std::map<std::string, int> >::iterator iterDirFileFilter;
+	for (iterDirFileFilter = allDirFilter.begin(); iterDirFileFilter != allDirFilter.end(); iterDirFileFilter++) {
+
+		writeSetList(iterDirFileFilter->first, iterDirFileFilter->second);
+	}
+	return 0;
+}
+
+
 int CMakeFile::writeCMakeLists()
 {
 	writeOptionLists();
+	writeFilterList(m_allDirFilter);
 	writeFileList(m_dirMap);
 	writeStaticLib();
 	writeSharedLib();

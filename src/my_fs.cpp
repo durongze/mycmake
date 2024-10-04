@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
-
+#include <algorithm>
+#include <cctype>
 
 #ifdef USE_ICONV
 #include <iconv.h>
@@ -239,4 +240,18 @@ void hex_data2gb2312_str(const uint8_t* data, unsigned long len)
     iconv_close(cd);
 #endif	
     return;
+}
+
+std::string ToUpperStr(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c) { return std::toupper(c); });
+    return str;
+}
+
+std::string ToLowerStr(std::string str)
+{
+    std::transform(str.begin(), str.end(), str.begin(),
+        [](unsigned char c) { return std::tolower(c); });
+    return str;
 }

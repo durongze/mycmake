@@ -3,15 +3,14 @@
 #include "my_fs.h"
 
 #include <iostream>
+#include <regex>
 
 std::string dbgRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\";
 
 void SetVcxprojWorkDir(const std::string& rootDir)
 {
-	int c;
 	dbgRootDir = rootDir + DIR_SEP;
 	std::cout << "RootDir:" << dbgRootDir << std::endl;
-	// std::cin >> c;
 }
 
 void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, std::ostream &os)
@@ -92,16 +91,29 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 	return 0;
 }
 
-int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt, std::map<std::string, std::map<std::string, int> > &dirFileFilter)
+std::string ProjConfigToCMakeVarStr(const std::string& projCfg, const std::string& cmakeSuffix)
 {
-	std::map<std::string, int> dirMap;
+	std::string cmake_dir_var = "FILTER_";
+	std::regex dir_cur_regex(DIR_CUR_REGEX);
+	std::regex dir_sep_regex(DIR_SEP_REGEX);
+	cmake_dir_var = cmake_dir_var + projCfg;
+	cmake_dir_var = std::regex_replace(cmake_dir_var, dir_sep_regex, "_");
+	cmake_dir_var = std::regex_replace(cmake_dir_var, dir_cur_regex, "");
+	cmake_dir_var = cmake_dir_var + cmakeSuffix;
+	cmake_dir_var = std::regex_replace(cmake_dir_var, std::regex("__"), "_");
+	return ToUpperStr(cmake_dir_var);
+}
+
+int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt, const std::string& cmakeVarSuffix, std::map<std::string, int> &dirMap, std::map<std::string, std::map<std::string, int> > &dirFileFilter)
+{
 	std::map<std::string, std::map<std::string, int> > dirFile;
 	std::map<std::string, int>::const_iterator iterdirMap;
 	RecordAllDirByFiles(fileMap, dirMap, dirFile);
 	DumpStrMap(dirMap, fileExt, std::cout);
 	for (iterdirMap = dirMap.cbegin(); iterdirMap != dirMap.cend(); iterdirMap++)
 	{
-		CompareFileNameByPath(dirFile[iterdirMap->first], iterdirMap->first, fileExt, dirFileFilter[iterdirMap->first]);
+		std::string curDirCMakeVar = ProjConfigToCMakeVarStr(iterdirMap->first, cmakeVarSuffix); 
+		CompareFileNameByPath(dirFile[iterdirMap->first], iterdirMap->first, fileExt, dirFileFilter[curDirCMakeVar]);
 	}
 
 	return 0;

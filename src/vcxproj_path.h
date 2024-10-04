@@ -14,6 +14,8 @@ int RecordAllDirByFiles(const std::map<std::string, int> &fileMap, std::map<std:
 
 int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::string &filePath, const std::string &fileExt, std::map<std::string, int>& fileFilter, std::ostream& os = std::cout);
 
-int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt, std::map<std::string, std::map<std::string, int> > & dirFileFilter);
+std::string ProjConfigToCMakeVarStr(const std::string& projCfg, const std::string& cmakeSuffix);
+
+int CheckFileList(const std::map<std::string, int>& fileMap, const std::string& fileExt, const std::string& cmakeSuffix, std::map<std::string, int> &dirMap, std::map<std::string, std::map<std::string, int> > & dirFileFilter);
 
 #endif
