@@ -4,6 +4,7 @@
 #include <cctype>
 #include <strstream>
 #include <regex>
+#include <filesystem>
 
 #include "vcxproj_path.h"
 #include "my_fs.h"
@@ -291,7 +292,7 @@ int CMakeFile::writeFileList(const CMakeVar& cmakeVar, const std::map<std::strin
 {
 	m_fs.open(m_name, std::ios::out | std::ios::app);
 	m_fs << std::endl;
-	m_fs << GenerateFileFuncLine(GetProjAsmList().Name(), GetProjTopDir().Value(), fileMap) << std::endl;
+	m_fs << GenerateFileFuncLine(cmakeVar.Name(), GetProjTopDir().Value(), fileMap) << std::endl;
 	m_fs.close();
 	return 0;
 }
@@ -316,10 +317,10 @@ int CMakeFile::writeStaticLib()
 	m_fs << std::endl;
 	m_fs << "set                       (  " << GetProjStaticLib().Name() << "               " << ToLowerStr(GetProjStaticLib().Name()) << "          )" << std::endl;
 	m_fs << "add_library               (" << GetProjStaticLib().Value() << "   STATIC     " << GetProjSrcList().Value() << "    )" << std::endl;
-	m_fs << "target_compile_definitions(" << GetProjStaticLib().Value() << "   PRIVATE    HAVE_CONFIG_H          " << GetProjDefList().Value() << ")" << std::endl;
+	m_fs << "target_compile_definitions(" << GetProjStaticLib().Value() << "   PRIVATE    " << GetProjDefList().Value() << "          HAVE_CONFIG_H" << ")" << std::endl;
 	m_fs << "target_include_directories(" << GetProjStaticLib().Value() << "   PUBLIC     " << GetProjIncDirSet().Value() << "                )" << std::endl;
-	m_fs << "target_link_directories   (" << GetProjStaticLib().Value() << "   PUBLIC     " << GetProjLibDirSet().Value() << "                 )" << std::endl;
-	m_fs << "target_link_libraries     (" << GetProjStaticLib().Value() << "              ${dep_libs}               " << GetProjAppDepLib().Value() << "           )" << std::endl;
+	m_fs << "target_link_directories   (" << GetProjStaticLib().Value() << "   PUBLIC     " << GetProjLibDirSet().Value() << "                )" << std::endl;
+	m_fs << "target_link_libraries     (" << GetProjStaticLib().Value() << "              " << GetProjAppDepLib().Value() << "        ${dep_libs}  " << ")" << std::endl;
 	m_fs << "target_compile_options    (" << GetProjStaticLib().Value() << "   PRIVATE     /Z7     /W4           )" << std::endl;
 	m_fs << "set_target_properties     (" << GetProjStaticLib().Value() << "   PROPERTIES CLEAN_DIRECT_OUTPUT 1     OUTPUT_NAME " << ToLowerStr(GetProjStaticLib().Name()) << "  )" << std::endl;
 	m_fs.close();
@@ -332,10 +333,10 @@ int CMakeFile::writeSharedLib()
 	m_fs << std::endl;
 	m_fs << "set                       (  " << GetProjSharedLib().Name() << "               " << ToLowerStr(GetProjSharedLib().Name()) << "          )" << std::endl;
 	m_fs << "add_library               (" << GetProjSharedLib().Value() << "   SHARED     " << GetProjSrcList().Value() << "    )" << std::endl;
-	m_fs << "target_compile_definitions(" << GetProjSharedLib().Value() << "   PRIVATE    HAVE_CONFIG_H          " << GetProjDefList().Value() << ")" << std::endl;
+	m_fs << "target_compile_definitions(" << GetProjSharedLib().Value() << "   PRIVATE    " << GetProjDefList().Value() << "    HAVE_CONFIG_H      " << ")" << std::endl;
 	m_fs << "target_include_directories(" << GetProjSharedLib().Value() << "   PUBLIC     " << GetProjIncDirSet().Value() << "                 )" << std::endl;
 	m_fs << "target_link_directories   (" << GetProjSharedLib().Value() << "   PUBLIC     " << GetProjLibDirSet().Value() << "                 )" << std::endl;
-	m_fs << "target_link_libraries     (" << GetProjSharedLib().Value() << "              ${dep_libs}               " << GetProjAppDepLib().Value() << "           )" << std::endl;
+	m_fs << "target_link_libraries     (" << GetProjSharedLib().Value() << "              " << GetProjAppDepLib().Value() << "   ${dep_libs}        " << ")" << std::endl;
 	m_fs << "target_compile_options    (" << GetProjSharedLib().Value() << "   PRIVATE     /Z7     /W4           )" << std::endl;
 	m_fs << "set_target_properties     (" << GetProjSharedLib().Value() << "   PROPERTIES CLEAN_DIRECT_OUTPUT 1     OUTPUT_NAME " << ToLowerStr(GetProjSharedLib().Name()) << "  )" << std::endl;
 	m_fs.close();
@@ -348,7 +349,7 @@ int CMakeFile::writeApp()
 	m_fs << std::endl;
 	m_fs << "set                       (  " << GetProjAppName().Name() << "                " << ToLowerStr(GetProjAppName().Name()) << "        )" << std::endl;
 	m_fs << "add_executable            (" << GetProjAppName().Value() << "               " << GetProjSrcList().Value() << "        " << GetProjAppList().Value() << "            )" << std::endl;
-	m_fs << "target_compile_definitions(" << GetProjAppName().Value() << "   PRIVATE     __SIZE_T_DEFINED	       " << GetProjAppDefs().Value() << "               )" << std::endl;
+	m_fs << "target_compile_definitions(" << GetProjAppName().Value() << "   PRIVATE     " << GetProjAppDefs().Value() << "     __SIZE_T_DEFINED	" << ")" << std::endl;
 	m_fs << "target_include_directories(" << GetProjAppName().Value() << "   PUBLIC      " << GetProjIncDirSet().Value() << "                   )" << std::endl;
 	m_fs << "target_link_directories   (" << GetProjAppName().Value() << "   PUBLIC      " << GetProjLibDirSet().Value() << "                   )" << std::endl;
 	m_fs << "target_link_libraries     (" << GetProjAppName().Value() << "               " << GetProjStaticLib().Value() << "         )" << std::endl;
@@ -505,13 +506,16 @@ CMakeVar  CMakeFile::GetProjAppDefs() {
 
 std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::map<std::string, int>& fileList)
 {
+	std::string relatPath;
 	std::strstream fileFuncLine;
 	std::map<std::string, int>::const_iterator iterDir;
-	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  ";
+	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  " << std::endl;
 	for (iterDir = fileList.cbegin(); iterDir != fileList.cend(); iterDir++) {
-		fileFuncLine << topDir << DIR_SEP << iterDir->first << std::endl;
+		// fileFuncLine << topDir << DIR_SEP << iterDir->first << std::endl;
+		relatPath = GenerateRelatPath(topDir, iterDir->first, topDir + ".." + DIR_SEP);
+		fileFuncLine << "        " << relatPath << std::endl;
 	}
-	fileFuncLine << "      )" << std::endl << std::ends;
+	fileFuncLine << "    )" << std::endl << std::ends;
 
 	std::regex dir_sep_regex(DIR_SEP_REGEX);
 	return  std::regex_replace(fileFuncLine.str(), dir_sep_regex, CMAKE_DIR_SEP);
@@ -519,13 +523,17 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const st
 
 std::string CMakeFile::GenerateFileFuncLine(const std::string &varName, const std::string &topDir, const std::map<std::string, int> &subDirList, const std::string &extName)
 {
+	std::string relatPath;
 	std::strstream fileFuncLine;
 	std::map<std::string, int>::const_iterator iterDir;
-	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  ";
+	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  " << std::endl;
 	for (iterDir = subDirList.cbegin(); iterDir != subDirList.cend(); iterDir++) {
-		fileFuncLine << topDir << DIR_SEP << iterDir->first << DIR_SEP << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
+		// fileFuncLine << topDir << DIR_SEP << iterDir->first << DIR_SEP;
+		relatPath = GenerateRelatPath(topDir, iterDir->first, topDir + ".." + DIR_SEP);
+		fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
+	    fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
 	}
-	fileFuncLine << "      )" << std::endl << std::ends;
+	fileFuncLine << "    )" << std::endl << std::ends;
 
 	std::regex dir_sep_regex(DIR_SEP_REGEX);
 	return  std::regex_replace(fileFuncLine.str(), dir_sep_regex, CMAKE_DIR_SEP);
@@ -533,14 +541,30 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string &varName, const st
 
 std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::string& subDir, const std::string& extName)
 {
+	std::string relatPath;
 	std::strstream fileFuncLine;
 	std::vector<std::string>::const_iterator iterDir;
-	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  ";
+	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  " << std::endl;
 
-		fileFuncLine << topDir << DIR_SEP << subDir << DIR_SEP << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
+	// fileFuncLine << topDir << DIR_SEP << subDir << DIR_SEP;
+	relatPath = GenerateRelatPath(topDir, subDir, topDir + ".." + DIR_SEP);
+	fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
+	fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
 
-	fileFuncLine << "      )" << std::endl << std::ends;
+	fileFuncLine << "    )" << std::endl << std::ends;
 
 	std::regex dir_sep_regex(DIR_SEP_REGEX);
 	return  std::regex_replace(fileFuncLine.str(), dir_sep_regex, CMAKE_DIR_SEP);
+}
+
+std::string CMakeFile::GenerateRelatPath(const std::string& topDir, const std::string& subFile, const std::string& baseDir)
+{
+	std::strstream fileFuncLine;
+	std::filesystem::path srcPath;
+	fileFuncLine << topDir << DIR_SEP << subFile << std::ends;
+	srcPath = fileFuncLine.str();
+	if (srcPath.string().at(0) != '$') {
+		srcPath = std::filesystem::relative(srcPath, baseDir);
+	}
+	return srcPath.string();
 }

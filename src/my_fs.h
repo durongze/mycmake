@@ -7,7 +7,8 @@
 
 #ifdef WIN32
 
-#define DIR_SEP "\\"
+#define DIR_SEP_C '\\'
+#define DIR_SEP   "\\"
 #define DIR_SEP_REGEX "\\\\"
 #define DIR_CUR_REGEX "\\."
 
@@ -18,6 +19,7 @@
 #endif
 #else
 
+#define DIR_SEP_C '/'
 #define DIR_SEP "/"
 
 #define MRP_API

@@ -87,6 +87,8 @@ private:
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::map<std::string, int> &dirList, const std::string& extName);
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::string& subDir, const std::string& extName);
 private:
+	std::string GenerateRelatPath(const std::string& topDir, const std::string& subDir, const std::string& baseDir);
+private:
 	std::fstream m_fs;
     std::string  m_name;
 	
