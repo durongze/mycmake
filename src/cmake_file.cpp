@@ -241,7 +241,8 @@ int CMakeFile::writeFilterList(std::map<std::string, std::map<std::string, int> 
 	std::map<std::string, std::map<std::string, int> >::iterator iterDirFileFilter;
 	for (iterDirFileFilter = allDirFilter.begin(); iterDirFileFilter != allDirFilter.end(); iterDirFileFilter++) {
 
-		writeSetList(iterDirFileFilter->first, iterDirFileFilter->second);
+		// writeSetList(iterDirFileFilter->first, iterDirFileFilter->second);
+		writeFileList(iterDirFileFilter->first, iterDirFileFilter->second);
 	}
 	return 0;
 }
@@ -282,6 +283,15 @@ int CMakeFile::writeRootDir()
 	m_fs << "set(" << GetProjTopDir().Name() << " ${CMAKE_CURRENT_SOURCE_DIR}) #CMAKE_SOURCE_DIR" << std::endl << std::endl;
 	m_fs << "set(" << GetProjIncDirSet().Name() << " ${CMAKE_CURRENT_SOURCE_DIR}/inc)                  " << std::endl;
 	m_fs << "set(" << GetProjLibDirSet().Name() << " ${CMAKE_CURRENT_SOURCE_DIR}/lib) #CMAKE_SOURCE_DIR" << std::endl << std::endl;
+	m_fs.close();
+	return 0;
+}
+
+int CMakeFile::writeFileList(const CMakeVar& cmakeVar, const std::map<std::string, int>& fileMap)
+{
+	m_fs.open(m_name, std::ios::out | std::ios::app);
+	m_fs << std::endl;
+	m_fs << GenerateFileFuncLine(GetProjAsmList().Name(), GetProjTopDir().Value(), fileMap) << std::endl;
 	m_fs.close();
 	return 0;
 }
@@ -491,6 +501,20 @@ CMakeVar  CMakeFile::GetProjAppDefs() {
 	str += m_ProjName.Name();
 	str += "_APP_DEFS";
 	return str;
+}
+
+std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::map<std::string, int>& fileList)
+{
+	std::strstream fileFuncLine;
+	std::map<std::string, int>::const_iterator iterDir;
+	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  ";
+	for (iterDir = fileList.cbegin(); iterDir != fileList.cend(); iterDir++) {
+		fileFuncLine << topDir << DIR_SEP << iterDir->first << std::endl;
+	}
+	fileFuncLine << "      )" << std::endl << std::ends;
+
+	std::regex dir_sep_regex(DIR_SEP_REGEX);
+	return  std::regex_replace(fileFuncLine.str(), dir_sep_regex, CMAKE_DIR_SEP);
 }
 
 std::string CMakeFile::GenerateFileFuncLine(const std::string &varName, const std::string &topDir, const std::map<std::string, int> &subDirList, const std::string &extName)

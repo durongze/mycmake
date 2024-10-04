@@ -71,6 +71,7 @@ public:
 	int writeSetList(const CMakeVar& cmakeVar, const std::string& cmakeValue);
 	int writeSetList(const CMakeVar& cmakeVar, const std::map<std::string, int>& fileMap);
 	int writeRootDir();
+	int writeFileList(const CMakeVar& cmakeVar, const std::map<std::string, int>& fileMap);
 	int writeFileList(const std::map<std::string, int>& dirMap);
 	int writeStaticLib();
 	int writeSharedLib();
@@ -82,6 +83,7 @@ public:
 
 	std::string GetCMakeVarName(int FileType);
 private:
+	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::map<std::string, int>& fileList);
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::map<std::string, int> &dirList, const std::string& extName);
 	std::string GenerateFileFuncLine(const std::string& varName, const std::string& topDir, const std::string& subDir, const std::string& extName);
 private:
