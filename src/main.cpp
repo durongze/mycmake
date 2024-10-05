@@ -111,7 +111,8 @@ int AppMain(int argc, char* argv[])
 	else {
 		// SetVcxprojWorkDir(GetAbsPathByName(std::string(argv[1])));
 		std::filesystem::path  abs_path = std::filesystem::absolute(std::string(argv[1]));
-		SetVcxprojWorkDir(abs_path.parent_path().string());
+		SetVcxprojWorkDir("E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\"); // abs_path.parent_path().string();
+		SetCMakeWorkDir("E:\\code\\my\\ffmpeg\\FFmpeg\\");
 	}
 
     return ParseProjMain(fileVcxproj, cmake_file);

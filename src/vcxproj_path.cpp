@@ -5,17 +5,17 @@
 #include <iostream>
 #include <regex>
 
-std::string dbgRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\";
+std::string vsProjRootDir;
 
 void SetVcxprojWorkDir(const std::string& rootDir)
 {
-	dbgRootDir = rootDir + DIR_SEP;
-	std::cout << "RootDir:" << dbgRootDir << std::endl;
+	vsProjRootDir = rootDir + DIR_SEP;
+	std::cout << "vsProjRootDir:" << vsProjRootDir << std::endl;
 }
 
 std::string GetVcxprojWorkDir()
 {
-	return dbgRootDir;
+	return vsProjRootDir;
 }
 
 void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, std::ostream &os)
@@ -57,7 +57,8 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 	int fileAllNo = 0;
 	int fileMapNo = 0;
 
-	ret = ReadFileByDir(dbgRootDir + filePath, fileExt, files);
+	std::string projRootDir = GetVcxprojWorkDir();
+	ret = ReadFileByDir(projRootDir + filePath, fileExt, files);
 
 	os << __FUNCTION__ << "  DIR:" << filePath << std::endl;
 	for (iterFile = files.begin(); iterFile != files.end(); iterFile++) {
@@ -66,7 +67,7 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 
 	for (iterFileAll = fileAll.begin(), iterFileMap = fileMap.cbegin() ; iterFileAll != fileAll.end() && iterFileMap != fileMap.cend(); )
 	{
-		std::string fileCur = iterFileAll->first.substr(dbgRootDir.length(), iterFileAll->first.length() - dbgRootDir.length());
+		std::string fileCur = iterFileAll->first.substr(projRootDir.length(), iterFileAll->first.length() - projRootDir.length());
 		ret = strcmp(fileCur.c_str(), iterFileMap->first.c_str());
 		if (ret > 0) {
 			os << fileMapNo << " FileMap[" << iterFileMap->second << "]:" << iterFileMap->first << std::endl;
@@ -84,7 +85,7 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 		}
 	}
 	while (iterFileAll != fileAll.end()) {
-		std::string fileCur = iterFileAll->first.substr(dbgRootDir.length(), iterFileAll->first.length() - dbgRootDir.length());
+		std::string fileCur = iterFileAll->first.substr(projRootDir.length(), iterFileAll->first.length() - projRootDir.length());
 		fileFilter[fileCur] = iterFileAll->second;
 		os << "FileAll[" << iterFileAll->second << "]:" << iterFileAll->first << std::endl;
 		iterFileAll++;

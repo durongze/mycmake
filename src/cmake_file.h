@@ -11,7 +11,9 @@
 #define CMAKE_FIILE_TO_STR(X)   #X
 #define CMAKE_DIR_SEP           "/"
 
+void SetCMakeWorkDir(const std::string& rootDir);
 
+std::string GetCMakeWorkDir();
 
 class CMakeVar {
 public:

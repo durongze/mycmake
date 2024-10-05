@@ -9,6 +9,19 @@
 #include "vcxproj_path.h"
 #include "my_fs.h"
 
+std::string cmakeRootDir;
+
+void SetCMakeWorkDir(const std::string& rootDir)
+{
+	cmakeRootDir = rootDir + DIR_SEP;
+	std::cout << "cmakeRootDir:" << cmakeRootDir << std::endl;
+}
+
+std::string GetCMakeWorkDir()
+{
+	return cmakeRootDir;
+}
+
 CMakeVar::CMakeVar(const char* varName) :m_varName(varName){
 
 }
@@ -512,7 +525,7 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const st
 	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  " << std::endl;
 	for (iterDir = fileList.cbegin(); iterDir != fileList.cend(); iterDir++) {
 		// fileFuncLine << topDir << DIR_SEP << iterDir->first << std::endl;
-		relatPath = GenerateRelatPath(topDir, iterDir->first, topDir + ".." + DIR_SEP);
+		relatPath = GenerateRelatPath(topDir, iterDir->first, GetCMakeWorkDir());
 		fileFuncLine << "        " << relatPath << std::endl;
 	}
 	fileFuncLine << "    )" << std::endl << std::ends;
@@ -529,7 +542,7 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string &varName, const st
 	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  " << std::endl;
 	for (iterDir = subDirList.cbegin(); iterDir != subDirList.cend(); iterDir++) {
 		// fileFuncLine << topDir << DIR_SEP << iterDir->first << DIR_SEP;
-		relatPath = GenerateRelatPath(topDir, iterDir->first, topDir + ".." + DIR_SEP);
+		relatPath = GenerateRelatPath(topDir, iterDir->first, GetCMakeWorkDir());
 		fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
 	    fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
 	}
@@ -547,7 +560,7 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const st
 	fileFuncLine << "file        (GLOB           " << varName << "         RELATIVE   " << topDir << "  " << std::endl;
 
 	// fileFuncLine << topDir << DIR_SEP << subDir << DIR_SEP;
-	relatPath = GenerateRelatPath(topDir, subDir, topDir + ".." + DIR_SEP);
+	relatPath = GenerateRelatPath(topDir, subDir, GetCMakeWorkDir());
 	fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
 	fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
 
