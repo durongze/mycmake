@@ -5,7 +5,7 @@
 #include <iostream>
 #include <regex>
 
-std::string vsProjRootDir;
+static std::string vsProjRootDir;
 
 void SetVcxprojWorkDir(const std::string& rootDir)
 {

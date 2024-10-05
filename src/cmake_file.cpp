@@ -9,7 +9,7 @@
 #include "vcxproj_path.h"
 #include "my_fs.h"
 
-std::string cmakeRootDir;
+static std::string cmakeRootDir;
 
 void SetCMakeWorkDir(const std::string& rootDir)
 {
