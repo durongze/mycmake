@@ -7,6 +7,7 @@
 #include <iostream>
 
 void SetVcxprojWorkDir(const std::string& rootDir);
+std::string GetVcxprojWorkDir();
 
 void DumpStrMap(std::map<std::string, int>& strMap, const std::string& fileExt, std::ostream& os);
 

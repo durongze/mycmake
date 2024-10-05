@@ -13,6 +13,11 @@ void SetVcxprojWorkDir(const std::string& rootDir)
 	std::cout << "RootDir:" << dbgRootDir << std::endl;
 }
 
+std::string GetVcxprojWorkDir()
+{
+	return dbgRootDir;
+}
+
 void DumpStrMap(std::map<std::string, int> &strMap, const std::string& fileExt, std::ostream &os)
 {
 	std::map<std::string, int>::iterator iterStrMap;

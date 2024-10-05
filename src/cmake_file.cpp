@@ -557,14 +557,32 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const st
 	return  std::regex_replace(fileFuncLine.str(), dir_sep_regex, CMAKE_DIR_SEP);
 }
 
+std::string CMakeFile::GetCMakeVarRealPath(const std::string& cmakeVarPath)
+{
+	std::string topCMakePath;
+	topCMakePath = GetProjTopDir().Value();
+	std::string srcCMakePath;
+	srcCMakePath = cmakeVarPath;
+	if (0 == strncmp(topCMakePath.c_str(), srcCMakePath.c_str(), strlen(topCMakePath.c_str()))) {
+		std::string topPathVal = GetVcxprojWorkDir();
+		// std::regex dir_sep_regex(GetProjTopDir().Value());
+		// srcPath = std::regex_replace(srcPath.string(), dir_sep_regex, topPathVal);
+		return srcCMakePath.replace(0, strlen(topCMakePath.c_str()), topPathVal.c_str());
+	}
+	return cmakeVarPath;
+}
+
 std::string CMakeFile::GenerateRelatPath(const std::string& topDir, const std::string& subFile, const std::string& baseDir)
 {
-	std::strstream fileFuncLine;
 	std::filesystem::path srcPath;
+	std::filesystem::path basePath;
+	std::strstream fileFuncLine;
+
 	fileFuncLine << topDir << DIR_SEP << subFile << std::ends;
-	srcPath = fileFuncLine.str();
+	srcPath = GetCMakeVarRealPath(fileFuncLine.str());
+	basePath = GetCMakeVarRealPath(baseDir);
 	if (srcPath.string().at(0) != '$') {
-		srcPath = std::filesystem::relative(srcPath, baseDir);
+		srcPath = std::filesystem::relative(srcPath, basePath);
 	}
 	return srcPath.string();
 }
