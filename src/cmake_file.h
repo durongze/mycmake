@@ -67,6 +67,9 @@ private:
 	CMakeVar GetProjAppDepLib();
 	CMakeVar GetProjAppDefs();
 public:
+	std::string GenPlatformCMakeVar(const std::string& platform, const std::string& varType);
+	int writeLibList(const std::string& libList, const std::string& platform);
+	int writeLibraryLists();
 	int writeOptList(const std::string& optionList, const std::string& platform);
 	int writeOptionLists();
 	int writeFilterList(std::map<std::string, std::map<std::string, int> >& allDirFilter);
@@ -98,6 +101,7 @@ private:
 	CMakeVar m_ProjName;
 	
 	std::map<CMakeVar, std::string> m_platformOpts;
+	std::map<CMakeVar, std::string> m_platformLibs;
 	std::map<std::string, int> m_dirMap;
 	std::map<std::string, std::map<std::string, int> > m_allDirFilter;
 };

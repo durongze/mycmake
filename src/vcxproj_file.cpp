@@ -137,6 +137,7 @@ TiXmlElement* Find_ItemDefinitionGroup(CMakeFile& cmakeFile, TiXmlElement* Proje
 		if (MatchItemDefinitionGroup(ItemDefinitionGroup->Value(), ItemDefinitionGroup->FirstAttribute()->Name())) {
 			DumpXmlNode(std::cout, ItemDefinitionGroup);
 			Find_PreprocessorDefinitions(cmakeFile, ItemDefinitionGroup);
+			Find_AdditionalDependencies(cmakeFile, ItemDefinitionGroup);
 		}
 	}
 	return ItemDefinitionGroup;
@@ -160,6 +161,14 @@ TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* I
 	TiXmlElement* ClCompile = NULL;
 	TiXmlElement* ClCompileChild = NULL;
 	ClCompile = ItemDefinitionGroup->FirstChildElement();
+	for (; ClCompile; ClCompile = ClCompile->NextSiblingElement()) {
+		if (ClCompile->Value() != NULL && std::string(ClCompile->Value()) == std::string("ClCompile")) {
+			break;
+		}
+	}
+	if (ClCompile == NULL) {
+		return NULL;
+	}
 	ClCompileChild = ClCompile->FirstChildElement();
 	for (; ClCompileChild; ClCompileChild = ClCompileChild->NextSiblingElement()) {
 		if (ClCompileChild->FirstAttribute() == NULL) {
@@ -170,6 +179,49 @@ TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* I
 			GetFirstAttrValue(ItemDefinitionGroup, platform);
 			// cmakeFile.write(ClCompileChild->GetText());
 			cmakeFile.writeOptList(ClCompileChild->GetText(), platform);
+		}
+	}
+	return ItemDefinitionGroup;
+}
+
+int MatchAdditionalDependencies(std::string Name, std::string AttrName)
+{
+	std::regex AdditionalDependencies;
+	std::string Pattern("AdditionalDependencies");
+	AdditionalDependencies = Pattern;
+	if (std::regex_search(Name, AdditionalDependencies)) {
+		return true;
+	}
+	return false;
+}
+
+TiXmlElement* Find_AdditionalDependencies(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name)
+{
+	std::string platform;
+	if (ItemDefinitionGroup == NULL) return NULL;
+	TiXmlElement* Lib = NULL;
+	TiXmlElement* LibChild = NULL;
+	Lib = ItemDefinitionGroup->FirstChildElement();
+	for (; Lib; Lib = Lib->NextSiblingElement()) {
+		if (Lib->Value() != NULL) {
+			if (std::string(Lib->Value()) == std::string("Lib") || std::string(Lib->Value()) == std::string("Link")) {
+				break;
+			}
+		}
+	}
+	if (Lib == NULL) {
+		return NULL;
+	}
+	LibChild = Lib->FirstChildElement();
+	for (; LibChild; LibChild = LibChild->NextSiblingElement()) {
+		if (LibChild->FirstAttribute() == NULL) {
+			;
+		}
+		if (MatchAdditionalDependencies(LibChild->Value(), "")) {
+			DumpXmlNode(std::cout, LibChild);
+			GetFirstAttrValue(ItemDefinitionGroup, platform);
+			// cmakeFile.write(LibChild->GetText());
+			cmakeFile.writeLibList(LibChild->GetText(), platform);
 		}
 	}
 	return ItemDefinitionGroup;

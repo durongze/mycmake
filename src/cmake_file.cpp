@@ -164,15 +164,38 @@ std::string CMakeFile::GetCMakeVarName(int FileType)
 	return fs.str();
 }
 
+std::string CMakeFile::GenPlatformCMakeVar(const std::string& platform, const std::string &varType)
+{
+
+	std::string optCMakeVar;
+	std::regex optVarRegex("\\|");
+	optCMakeVar = std::regex_replace(platform, optVarRegex, "_");
+	optCMakeVar = std::regex_replace(optCMakeVar, std::regex("'"), "");
+	std::regex optVarRegexAfter(".*==(\\S+)");
+	optCMakeVar = GetProjName().Name() + "_" + varType + "_" + ToUpperStr(std::regex_replace(optCMakeVar, optVarRegexAfter, "$1"));
+	return optCMakeVar;
+}
+
+int CMakeFile::writeLibList(const std::string& libList, const std::string& platform)
+{
+	std::string libMakeList;
+	std::string libCMakeVar;
+	libCMakeVar = GenPlatformCMakeVar(platform, std::string("LIBS"));
+
+	std::regex optListRegex(";");
+	libMakeList = std::regex_replace(libList, optListRegex, "    ");
+
+	
+	libMakeList = std::regex_replace(libMakeList, std::regex("\\%\\(AdditionalDependencies\\)"), "    ");
+	m_platformLibs[libCMakeVar] = libMakeList;
+	return 0;
+}
+
 int CMakeFile::writeOptList(const std::string& optionList, const std::string &platform)
 {
 	std::string optCMakeList;
 	std::string optCMakeVar;
-	std::regex optVarRegex("\\|");
-    optCMakeVar =  std::regex_replace(platform, optVarRegex, "_");
-	optCMakeVar = std::regex_replace(optCMakeVar, std::regex("'"), "");
-	std::regex optVarRegexAfter(".*==(\\S+)");
-	optCMakeVar = GetProjName().Name() + "_" + ToUpperStr(std::regex_replace(optCMakeVar, optVarRegexAfter, "$1"));
+	optCMakeVar = GenPlatformCMakeVar(platform, "DEFS");
 
 	std::regex optListRegex(";");
 	optCMakeList = std::regex_replace(optionList, optListRegex, "    ");
@@ -240,6 +263,16 @@ int CMakeFile::write(const std::map<std::string, int>& fileMap, int FileType)
 	return 0;
 }
 
+int CMakeFile::writeLibraryLists()
+{
+	std::map<CMakeVar, std::string>::const_iterator  iterPlatformLibs;
+	for (iterPlatformLibs = m_platformLibs.cbegin(); iterPlatformLibs != m_platformLibs.cend(); iterPlatformLibs++)
+	{
+		writeSetList(iterPlatformLibs->first, iterPlatformLibs->second);
+	}
+	return 0;
+}
+
 int CMakeFile::writeOptionLists()
 {
 	std::map<CMakeVar, std::string>::const_iterator  iterPlatformOpts;
@@ -265,6 +298,7 @@ int CMakeFile::writeFilterList(std::map<std::string, std::map<std::string, int> 
 int CMakeFile::writeCMakeLists()
 {
 	writeOptionLists();
+	writeLibraryLists();
 	writeFilterList(m_allDirFilter);
 	writeFileList(m_dirMap);
 	writeStaticLib();

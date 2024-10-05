@@ -35,6 +35,9 @@ TiXmlElement* Find_ImportGroup(TiXmlElement* Project, const char* name = "Import
 int MatchItemDefinitionGroup(std::string Name, std::string AttrName);
 TiXmlElement* Find_ItemDefinitionGroup(CMakeFile& cmakeFile, TiXmlElement* Project, const char* name = "ItemDefinitionGroup");
 
+int MatchAdditionalDependencies(std::string Name, std::string AttrName);
+TiXmlElement* Find_AdditionalDependencies(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "AdditionalDependencies");
+
 int MatchPreprocessorDefinitions(std::string Name, std::string AttrName);
 TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions");
 
