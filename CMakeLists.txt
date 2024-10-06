@@ -20,6 +20,7 @@ add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/execution-charset:utf-8>")
 set (MYCMAKE_BIN_DIR  ${CMAKE_CURRENT_BINARY_DIR})  
 set (MYCMAKE_TOP_DIR  ${CMAKE_CURRENT_SOURCE_DIR}) #CMAKE_SOURCE_DIR
 
+set (ALL_HDR_DIR      ${MYCMAKE_TOP_DIR}/include)
 set (ALL_SRC_DIR      ${MYCMAKE_TOP_DIR}/src)
 
 set (MYCMAKE_INC_DIRS ${MYCMAKE_TOP_DIR}/inc     ${MYCMAKE_TOP_DIR}/src    ) 
@@ -27,9 +28,9 @@ set (MYCMAKE_LIB_DIRS ${MYCMAKE_TOP_DIR}/lib                               ) #CM
 
 #include(cmake/dep_3rdlib_files.cmake)
 
-configure_file(${ALL_SRC_DIR}/config.h.win32              ${ALL_SRC_DIR}/config.h)
+configure_file(${ALL_HDR_DIR}/config.h.win32              ${ALL_HDR_DIR}/config.h)
 
-file(GLOB           MYCMAKE_HDR_LIST        RELATIVE    ${MYCMAKE_TOP_DIR}    ${ALL_SRC_DIR}/*.h*   )
+file(GLOB           MYCMAKE_HDR_LIST        RELATIVE    ${MYCMAKE_TOP_DIR}    ${ALL_HDR_DIR}/*.h*   )
 file(GLOB           MYCMAKE_SRC_LIST        RELATIVE    ${MYCMAKE_TOP_DIR}    ${ALL_SRC_DIR}/*.c*   )
 file(GLOB           MYCMAKE_SRC_MAIN        RELATIVE    ${MYCMAKE_TOP_DIR}    ${ALL_SRC_DIR}/main.c*)
 
