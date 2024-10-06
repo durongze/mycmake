@@ -70,7 +70,7 @@ public:
 	std::string GenPlatformCMakeVar(const std::string& platform, const std::string& varType);
 	int writeLibList(const std::string& libList, const std::string& platform);
 	int writeLibraryLists();
-	int writeOptList(const std::string& optionList, const std::string& platform);
+	int writeOptList(const std::string& optionList, const std::string& platform, int FileType);
 	int writeOptionLists();
 	int writeFilterList(std::map<std::string, std::map<std::string, int> >& allDirFilter);
 	int writeSetList(const CMakeVar& cmakeVar, const std::string& cmakeValue);

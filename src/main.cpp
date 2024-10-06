@@ -114,9 +114,11 @@ int AppMain(int argc, char* argv[])
 		std::filesystem::path  abs_path = std::filesystem::absolute(std::string(argv[1]));
 		SetVcxprojWorkDir(abs_path.parent_path().string()); // ; //
 		// SetVcxprojWorkDir("E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\");
+		
 		std::cout << "Input TopDir for CMakeLists.txt :" << std::endl << ">" ;
 		std::cin >> cmakeRootDir;
 		// cmakeRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\";
+		
 		SetCMakeWorkDir(cmakeRootDir); // 
 	}
 

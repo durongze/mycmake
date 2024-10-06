@@ -191,16 +191,15 @@ int CMakeFile::writeLibList(const std::string& libList, const std::string& platf
 	return 0;
 }
 
-int CMakeFile::writeOptList(const std::string& optionList, const std::string &platform)
+int CMakeFile::writeOptList(const std::string& optionList, const std::string &platform, int FileType)
 {
 	std::string optCMakeList;
 	std::string optCMakeVar;
-	optCMakeVar = GenPlatformCMakeVar(platform, "DEFS");
-
+	
+	optCMakeVar = GenPlatformCMakeVar(platform, "DEFS") + GetCMakeDirVarSuffix(FileType);
+	
 	std::regex optListRegex(";");
 	optCMakeList = std::regex_replace(optionList, optListRegex, "    ");
-
-	
 	optCMakeList = std::regex_replace(optCMakeList, std::regex("\\%\\(PreprocessorDefinitions\\)"), "    ");
 	m_platformOpts[optCMakeVar] = optCMakeList;
 

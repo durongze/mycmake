@@ -39,7 +39,9 @@ int MatchAdditionalDependencies(std::string Name, std::string AttrName);
 TiXmlElement* Find_AdditionalDependencies(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "AdditionalDependencies");
 
 int MatchPreprocessorDefinitions(std::string Name, std::string AttrName);
-TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions");
+TiXmlElement* Find_ClCompilePreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions");
+TiXmlElement* Find_NASMPreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions");
+TiXmlElement* Find_ResourceCompilePreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name = "PreprocessorDefinitions");
 
 int MatchItemGroup_NASM(std::string Name, std::string AttrName);
 TiXmlElement* Find_ItemGroup_NASM(CMakeFile& cmakeFile, TiXmlElement* ItemGroup, const char* name = "NASM");

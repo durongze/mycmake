@@ -136,7 +136,9 @@ TiXmlElement* Find_ItemDefinitionGroup(CMakeFile& cmakeFile, TiXmlElement* Proje
 		// DumpXmlNode(std::cout, ItemDefinitionGroup);
 		if (MatchItemDefinitionGroup(ItemDefinitionGroup->Value(), ItemDefinitionGroup->FirstAttribute()->Name())) {
 			DumpXmlNode(std::cout, ItemDefinitionGroup);
-			Find_PreprocessorDefinitions(cmakeFile, ItemDefinitionGroup);
+			Find_ClCompilePreprocessorDefinitions(cmakeFile, ItemDefinitionGroup);
+			Find_NASMPreprocessorDefinitions(cmakeFile, ItemDefinitionGroup);
+			Find_ResourceCompilePreprocessorDefinitions(cmakeFile, ItemDefinitionGroup);
 			Find_AdditionalDependencies(cmakeFile, ItemDefinitionGroup);
 		}
 	}
@@ -154,7 +156,7 @@ int MatchPreprocessorDefinitions(std::string Name, std::string AttrName)
 	return false;
 }
 
-TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name )
+TiXmlElement* Find_ClCompilePreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name )
 {
 	std::string platform;
 	if (ItemDefinitionGroup == NULL) return NULL;
@@ -178,7 +180,67 @@ TiXmlElement* Find_PreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* I
 			DumpXmlNode(std::cout, ClCompileChild);
 			GetFirstAttrValue(ItemDefinitionGroup, platform);
 			// cmakeFile.write(ClCompileChild->GetText());
-			cmakeFile.writeOptList(ClCompileChild->GetText(), platform);
+			cmakeFile.writeOptList(ClCompileChild->GetText(), platform, CMakeFile::FILE_TYPE_CPP);
+		}
+	}
+	return ItemDefinitionGroup;
+}
+
+TiXmlElement* Find_NASMPreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name)
+{
+	std::string platform;
+	if (ItemDefinitionGroup == NULL) return NULL;
+	TiXmlElement* NASM = NULL;
+	TiXmlElement* NASMChild = NULL;
+	NASM = ItemDefinitionGroup->FirstChildElement();
+	for (; NASM; NASM = NASM->NextSiblingElement()) {
+		if (NASM->Value() != NULL && std::string(NASM->Value()) == std::string("NASM")) {
+			break;
+		}
+	}
+	if (NASM == NULL) {
+		return NULL;
+	}
+	NASMChild = NASM->FirstChildElement();
+	for (; NASMChild; NASMChild = NASMChild->NextSiblingElement()) {
+		if (NASMChild->FirstAttribute() == NULL) {
+			;
+		}
+		if (MatchPreprocessorDefinitions(NASMChild->Value(), "")) {
+			DumpXmlNode(std::cout, NASMChild);
+			GetFirstAttrValue(ItemDefinitionGroup, platform);
+			// cmakeFile.write(NASMChild->GetText());
+			cmakeFile.writeOptList(NASMChild->GetText(), platform, CMakeFile::FILE_TYPE_ASM);
+		}
+	}
+	return ItemDefinitionGroup;
+}
+
+TiXmlElement* Find_ResourceCompilePreprocessorDefinitions(CMakeFile& cmakeFile, TiXmlElement* ItemDefinitionGroup, const char* name)
+{
+	std::string platform;
+	if (ItemDefinitionGroup == NULL) return NULL;
+	TiXmlElement* ResourceCompile = NULL;
+	TiXmlElement* ResourceCompileChild = NULL;
+	ResourceCompile = ItemDefinitionGroup->FirstChildElement();
+	for (; ResourceCompile; ResourceCompile = ResourceCompile->NextSiblingElement()) {
+		if (ResourceCompile->Value() != NULL && std::string(ResourceCompile->Value()) == std::string("NASM")) {
+			break;
+		}
+	}
+	if (ResourceCompile == NULL) {
+		return NULL;
+	}
+	ResourceCompileChild = ResourceCompile->FirstChildElement();
+	for (; ResourceCompileChild; ResourceCompileChild = ResourceCompileChild->NextSiblingElement()) {
+		if (ResourceCompileChild->FirstAttribute() == NULL) {
+			;
+		}
+		if (MatchPreprocessorDefinitions(ResourceCompileChild->Value(), "")) {
+			DumpXmlNode(std::cout, ResourceCompileChild);
+			GetFirstAttrValue(ItemDefinitionGroup, platform);
+			// cmakeFile.write(ResourceCompileChild->GetText());
+			cmakeFile.writeOptList(ResourceCompileChild->GetText(), platform, CMakeFile::FILE_TYPE_RES);
 		}
 	}
 	return ItemDefinitionGroup;
