@@ -35,14 +35,16 @@ file(GLOB           MYCMAKE_SRC_MAIN        RELATIVE    ${MYCMAKE_TOP_DIR}    ${
 
 list(REMOVE_ITEM    MYCMAKE_SRC_LIST                    ${MYCMAKE_SRC_MAIN}    )
 
+set     (MYCMAKE_ALL_SRCS     ${MYCMAKE_SRC_LIST}    ${MYCMAKE_HDR_LIST})
+
 message ("[INFO] MYCMAKE_TOP_DIR :${MYCMAKE_TOP_DIR}")
 message ("[INFO] MYCMAKE_INC_DIRS:${MYCMAKE_INC_DIRS}")
 message ("[INFO] MYCMAKE_SRC_LIST:${MYCMAKE_SRC_LIST}")
 
-source_group(TREE          ${MYCMAKE_TOP_DIR}  FILES      ${MYCMAKE_SRC_LIST}    ${MYCMAKE_HDR_LIST})
+source_group(TREE          ${MYCMAKE_TOP_DIR}  FILES      ${MYCMAKE_ALL_SRCS}                        )
 
 set                       (  MYCMAKE_STATIC               libmycmake_static                          )
-add_library               (${MYCMAKE_STATIC}   STATIC     ${MYCMAKE_SRC_LIST}     ${MYCMAKE_SRC_MAIN})
+add_library               (${MYCMAKE_STATIC}   STATIC     ${MYCMAKE_ALL_SRCS}     ${MYCMAKE_SRC_MAIN})
 target_compile_definitions(${MYCMAKE_STATIC}   PRIVATE    ${MYCMAKE_DEF_LIST}     HAVE_CONFIG_H      )
 target_include_directories(${MYCMAKE_STATIC}   PUBLIC     ${MYCMAKE_INC_DIRS}                        )
 target_link_directories   (${MYCMAKE_STATIC}   PUBLIC     ${MYCMAKE_LIB_DIRS}                        )
@@ -51,7 +53,7 @@ target_compile_options    (${MYCMAKE_STATIC}   PRIVATE     /Z7     /W4          
 set_target_properties     (${MYCMAKE_STATIC}   PROPERTIES CLEAN_DIRECT_OUTPUT 1   OUTPUT_NAME libavcodec_static  )
 
 set                       (  MYCMAKE_SHARED               libmycmake_shared                          )
-add_library               (${MYCMAKE_SHARED}   SHARED     ${MYCMAKE_SRC_LIST}     ${MYCMAKE_SRC_MAIN})
+add_library               (${MYCMAKE_SHARED}   SHARED     ${MYCMAKE_ALL_SRCS}     ${MYCMAKE_SRC_MAIN})
 target_compile_definitions(${MYCMAKE_SHARED}   PRIVATE    ${MYCMAKE_DEF_LIST}     HAVE_CONFIG_H      )
 target_include_directories(${MYCMAKE_SHARED}   PUBLIC     ${MYCMAKE_INC_DIRS}                        )
 target_link_directories   (${MYCMAKE_SHARED}   PUBLIC     ${MYCMAKE_LIB_DIRS}                        )
@@ -60,7 +62,7 @@ target_compile_options    (${MYCMAKE_SHARED}   PRIVATE     /Z7     /W4          
 set_target_properties     (${MYCMAKE_SHARED}   PROPERTIES CLEAN_DIRECT_OUTPUT 1   OUTPUT_NAME libavcodec_shared  )
 
 set                       (  MYCMAKE_APP                   mycmake_app                                   )
-add_executable            (${MYCMAKE_APP}                  ${MYCMAKE_HDR_LIST}    ${MYCMAKE_SRC_LIST}    )
+add_executable            (${MYCMAKE_APP}                  ${MYCMAKE_ALL_SRCS}    ${MYCMAKE_SRC_MAIN}    )
 target_compile_definitions(${MYCMAKE_APP}      PRIVATE     UNICODE;_UNICODE       _CRT_SECURE_NO_WARNINGS)
 target_include_directories(${MYCMAKE_APP}      PUBLIC      ./src                                         )
 target_link_directories   (${MYCMAKE_APP}      PUBLIC      ./lib                                         )
