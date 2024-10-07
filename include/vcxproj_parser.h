@@ -66,10 +66,19 @@ public:
 	VcxItemGroup();
 	~VcxItemGroup();
 public:
-	int Match(std::string Name, std::string AttrName);
+	int MatchProjectConfiguration(std::string ElementName, std::string AttrName);
+	int MatchNASM(std::string Name, std::string AttrName);
+	int MatchClCompile(std::string Name, std::string AttrName);
+	int MatchClInclude(std::string Name, std::string AttrName);
+	int MatchResourceCompile(std::string Name, std::string AttrName);
 	int Load(TiXmlElement* Project);
 private:
 	VcxItemGroupProjCfgPtr m_cfg;
+	std::map<std::string, int> m_projCfg;
+	std::map<std::string, int> m_asmMap;
+	std::map<std::string, int> m_cppMap;
+	std::map<std::string, int> m_incMap;
+	std::map<std::string, int> m_resMap;
 };
 
 using VcxItemGroupPtr = std::shared_ptr<VcxItemGroup>;
@@ -114,6 +123,9 @@ class VcxItemDefinitionClCompile
 public:
 	VcxItemDefinitionClCompile();
 	~VcxItemDefinitionClCompile();
+public:
+	int MatchPreprocessorDefinitions(std::string ElementName, std::string AttrName);
+	int Load(TiXmlElement* itemDefinitionGroup);
 };
 using VcxItemDefinitionClCompilePtr = std::shared_ptr<VcxItemDefinitionClCompile>;
 
@@ -122,6 +134,9 @@ class VcxItemDefinitionLib
 public:
 	VcxItemDefinitionLib();
 	~VcxItemDefinitionLib();
+public:
+	int MatchAdditionalDependencies(std::string Name, std::string AttrName);
+	int Load(TiXmlElement* itemDefinitionGroup);
 };
 using VcxItemDefinitionLibPtr = std::shared_ptr<VcxItemDefinitionLib>;
 
@@ -130,6 +145,9 @@ class VcxItemDefinitionNASM
 public:
 	VcxItemDefinitionNASM();
 	~VcxItemDefinitionNASM();
+public:
+	int MatchPreprocessorDefinitions(std::string Name, std::string AttrName);
+	int Load(TiXmlElement* itemDefinitionGroup);
 };
 using VcxItemDefinitionNASMPtr = std::shared_ptr<VcxItemDefinitionNASM>;
 
@@ -155,15 +173,33 @@ public:
 	~VcxItemDefinitionCustomBuildStep();
 };
 
+class VcxItemDefinitionResourceCompile
+{
+public:
+	VcxItemDefinitionResourceCompile();
+	~VcxItemDefinitionResourceCompile();
+public:
+	int MatchPreprocessorDefinitions(std::string Name, std::string AttrName);
+	int Load(TiXmlElement* itemDefinitionGroup);
+};
+using VcxItemDefinitionResourceCompilePtr = std::shared_ptr<VcxItemDefinitionResourceCompile>;
+
 class VcxItemDefinitionGroup {
 public:
 	VcxItemDefinitionGroup();
 	~VcxItemDefinitionGroup();
 public:
-	int Match(std::string Name, std::string AttrName);
+	int MatchClCompile(TiXmlElement* itemDefinitionGroup, TiXmlElement*& ItemDefinitionGroupClCompile);
+	int MatchLib(TiXmlElement* itemDefinitionGroup, TiXmlElement*& ItemDefinitionGroupLib);
+	int MatchNASM(TiXmlElement* itemDefinitionGroup, TiXmlElement*& ItemDefinitionGroupNASM);
+	int MatchResourceCompile(TiXmlElement* itemDefinitionGroup, TiXmlElement*& ItemDefinitionGroupResourceCompile);
+
 	int Load(TiXmlElement* Project);
 private:
-
+	std::map <std::string, VcxItemDefinitionClCompilePtr> m_clCompile;
+	std::map <std::string, VcxItemDefinitionLibPtr> m_lib;
+	std::map <std::string, VcxItemDefinitionNASMPtr> m_nasm;
+	std::map <std::string, VcxItemDefinitionResourceCompilePtr> m_resCompile;
 };
 using VcxItemDefinitionGroupPtr = std::shared_ptr<VcxItemDefinitionGroup>;
 
