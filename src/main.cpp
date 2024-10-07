@@ -18,6 +18,8 @@
 #include "vcxproj_file.h"
 #include "vcxproj_path.h"
 
+#include "vcxproj_parser.h"
+
 inline wchar_t* AnsiToUnicode(const char* szStr)
 {
 	wchar_t* pResult = NULL;
@@ -112,6 +114,10 @@ int AppMain(int argc, char* argv[])
 		std::string cmakeRootDir;
 		// SetVcxprojWorkDir(GetAbsPathByName(std::string(argv[1])));
 		std::filesystem::path  abs_path = std::filesystem::absolute(std::string(argv[1]));
+
+		VcxProjParser  projParser;
+		projParser.Load(std::string(argv[1]));
+
 		SetVcxprojWorkDir(abs_path.parent_path().string()); // ; //
 		// SetVcxprojWorkDir("E:\\code\\my\\ffmpeg\\FFmpeg\\SMP\\");
 		
@@ -120,6 +126,8 @@ int AppMain(int argc, char* argv[])
 		// cmakeRootDir = "E:\\code\\my\\ffmpeg\\FFmpeg\\";
 		
 		SetCMakeWorkDir(cmakeRootDir); // 
+
+
 	}
 
     return ParseProjMain(fileVcxproj, cmake_file);

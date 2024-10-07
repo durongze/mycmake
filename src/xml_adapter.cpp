@@ -16,7 +16,7 @@ void GetFirstAttrValue(TiXmlElement* name, std::string &platform)
 	}
 }
 
-void DumpXmlNode(std::ostream& os, TiXmlElement* name)
+void MyDumpXmlNode(std::ostream& os, TiXmlElement* name, const std::string func)
 {
 	TiXmlAttribute* attr;
 	if (NULL != name)
@@ -30,7 +30,7 @@ void DumpXmlNode(std::ostream& os, TiXmlElement* name)
 		os << std::endl;
 		attr = name->FirstAttribute();
 		do {
-			DumpXmlAttribute(os, attr);
+			MyDumpXmlAttribute(os, attr);
 		} while ((attr != name->LastAttribute()) && (attr = attr->Next()));
 		os << std::endl;
 		TiXmlElement *aXml = name->FirstChildElement();
@@ -38,7 +38,7 @@ void DumpXmlNode(std::ostream& os, TiXmlElement* name)
 	}
 }
 
-void DumpXmlAttribute(std::ostream& os, TiXmlAttribute* attr)
+void MyDumpXmlAttribute(std::ostream& os, TiXmlAttribute* attr)
 {
 	if (attr) {
 		os << "\tAttr:" << attr->Name() << "=" << attr->Value() << std::endl;

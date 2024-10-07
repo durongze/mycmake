@@ -3,8 +3,10 @@
 
 #include "tinyxml.h"
 
+#define DumpXmlNode(os, xmlName) MyDumpXmlNode(os, xmlName, __FUNCTION__)
+
 void GetFirstAttrValue(TiXmlElement* name, std::string& platform);
-void DumpXmlNode(std::ostream &os, TiXmlElement* name);
-void DumpXmlAttribute(std::ostream& os, TiXmlAttribute* attr);
+void MyDumpXmlNode(std::ostream &os, TiXmlElement* name, const std::string func);
+void MyDumpXmlAttribute(std::ostream& os, TiXmlAttribute* attr);
 
 #endif

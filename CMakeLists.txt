@@ -22,9 +22,10 @@ set (MYCMAKE_TOP_DIR  ${CMAKE_CURRENT_SOURCE_DIR}) #CMAKE_SOURCE_DIR
 
 set (ALL_HDR_DIR      ${MYCMAKE_TOP_DIR}/include)
 set (ALL_SRC_DIR      ${MYCMAKE_TOP_DIR}/src)
+set (ALL_LIB_DIR      ${MYCMAKE_TOP_DIR}/src)
 
-set (MYCMAKE_INC_DIRS ${MYCMAKE_TOP_DIR}/inc     ${MYCMAKE_TOP_DIR}/src    ) 
-set (MYCMAKE_LIB_DIRS ${MYCMAKE_TOP_DIR}/lib                               ) #CMAKE_SOURCE_DIR
+set (MYCMAKE_INC_DIRS ${ALL_HDR_DIR}/           ${ALL_SRC_DIR}/ ) 
+set (MYCMAKE_LIB_DIRS ${ALL_LIB_DIR}/                           ) #CMAKE_SOURCE_DIR
 
 #include(cmake/dep_3rdlib_files.cmake)
 
@@ -64,10 +65,10 @@ set_target_properties     (${MYCMAKE_SHARED}   PROPERTIES CLEAN_DIRECT_OUTPUT 1 
 
 set                       (  MYCMAKE_APP                   mycmake_app                                   )
 add_executable            (${MYCMAKE_APP}                  ${MYCMAKE_ALL_SRCS}    ${MYCMAKE_SRC_MAIN}    )
-target_compile_definitions(${MYCMAKE_APP}      PRIVATE     UNICODE;_UNICODE       _CRT_SECURE_NO_WARNINGS)
-target_include_directories(${MYCMAKE_APP}      PUBLIC      ./src                                         )
-target_link_directories   (${MYCMAKE_APP}      PUBLIC      ./lib                                         )
-target_link_libraries     (${MYCMAKE_APP}                  ${LIBAVCODEC_STATIC}                          )
+target_compile_definitions(${MYCMAKE_APP}      PRIVATE     ${MYCMAKE_DEF_LIST}    UNICODE;_UNICODE       _CRT_SECURE_NO_WARNINGS)
+target_include_directories(${MYCMAKE_APP}      PUBLIC      ${MYCMAKE_INC_DIRS}                           )
+target_link_directories   (${MYCMAKE_APP}      PUBLIC      ${MYCMAKE_LIB_DIRS}                           )
+target_link_libraries     (${MYCMAKE_APP}                  ${MYCMAKE_DEP_LIBS}    ${LIBAVCODEC_STATIC}   )
 target_compile_options    (${MYCMAKE_APP}      PRIVATE     /Z7     /W4                                   )
 set_target_properties     (${MYCMAKE_APP}      PROPERTIES  CLEAN_DIRECT_OUTPUT 1  OUTPUT_NAME "mycmake"  )
 
