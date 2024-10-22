@@ -567,6 +567,16 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const st
 	return  std::regex_replace(fileFuncLine.str(), dir_sep_regex, CMAKE_DIR_SEP);
 }
 
+std::string FixRelatPath(const std::string& relatPath)
+{
+	std::strstream fileFuncLine;
+	if (relatPath.length() > 0) {
+		fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
+	}
+	fileFuncLine << std::ends;
+    return fileFuncLine.str();
+}
+
 std::string CMakeFile::GenerateFileFuncLine(const std::string &varName, const std::string &topDir, const std::map<std::string, int> &subDirList, const std::string &extName)
 {
 	std::string relatPath;
@@ -576,8 +586,9 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string &varName, const st
 	for (iterDir = subDirList.cbegin(); iterDir != subDirList.cend(); iterDir++) {
 		// fileFuncLine << topDir << DIR_SEP << iterDir->first << DIR_SEP;
 		relatPath = GenerateRelatPath(topDir, iterDir->first, GetCMakeWorkDir());
-		fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
-	    fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
+		relatPath = FixRelatPath(relatPath);
+		fileFuncLine << relatPath;
+		fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
 	}
 	fileFuncLine << "    )" << std::endl << std::ends;
 
@@ -594,7 +605,8 @@ std::string CMakeFile::GenerateFileFuncLine(const std::string& varName, const st
 
 	// fileFuncLine << topDir << DIR_SEP << subDir << DIR_SEP;
 	relatPath = GenerateRelatPath(topDir, subDir, GetCMakeWorkDir());
-	fileFuncLine << "        " << relatPath << (relatPath.at(relatPath.length() - 1) == DIR_SEP_C ? "" : std::string(DIR_SEP));
+	relatPath = FixRelatPath(relatPath);
+	fileFuncLine << relatPath;
 	fileFuncLine << "*" << (extName.at(0) == '.' ? extName : std::string(".") + extName) << "   ";
 
 	fileFuncLine << "    )" << std::endl << std::ends;

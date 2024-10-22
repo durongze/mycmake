@@ -1,4 +1,5 @@
 #include "vcxproj_path.h"
+#include "cmake_file.h"
 
 #include "my_fs.h"
 
@@ -37,7 +38,13 @@ int RecordAllDirByFiles(const std::map<std::string, int>& fileMap, std::map<std:
 	for (iterFileMap = fileMap.cbegin(); iterFileMap != fileMap.cend(); iterFileMap++, dirIdx++)
 	{
 		dirLen = iterFileMap->first.rfind(DIR_SEP);
-		dirName = iterFileMap->first.substr(0, dirLen);
+		if (-1 == dirLen) {
+			dirName = std::string(".") + DIR_SEP; // CMAKE_DIR_SEP;
+		}
+		else {
+			dirName = iterFileMap->first.substr(0, dirLen);
+		}
+
 		dirMap[dirName] = dirIdx;
 		dirFile[dirName][iterFileMap->first] = iterFileMap->second;
 	}
