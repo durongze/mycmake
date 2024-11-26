@@ -15,9 +15,10 @@ set old_sys_path="%path%"
 set PERL5LIB=%PERL5LIB%
 set PerlPath=%ProgramDir%\Perl\bin
 set NASMPath=%ProgramDir%\nasm\bin
+set YASMPath=%ProgramDir%\yasm\bin
 set CMakePath=%ProgramDir%\cmake\bin
 set PythonHome=%ProgramDir%\python
-set PATH=%NASMPath%;%PerlPath%;%CMakePath%;%PythonHome%;%PATH%
+set PATH=%NASMPath%;%YASMPath%;%PerlPath%;%CMakePath%;%PythonHome%;%PythonHome%\Scripts;%PATH%
 
 set CurDir=%~dp0
 
@@ -27,12 +28,18 @@ set software_dir="%ProjDir%\thirdparty"
 set HomeDir=%ProjDir%\out\windows
 @rem set HomeDir=%ProgramDir%
 
-call :SetProjEnv %CurDir% include lib path CMAKE_INCLUDE_PATH CMAKE_LIBRARY_PATH CMAKE_MODULE_PATH
+call :SetProjEnv %software_dir% %CurDir% include lib path CMAKE_INCLUDE_PATH CMAKE_LIBRARY_PATH CMAKE_MODULE_PATH
 call :ShowProjEnv
 
 set SystemBinDir=.\
 
+@rem x86  or x64
 call %VisualStudioCmd% x86
+@rem call "C:\Qt\6.5.2\msvc2019_64\bin\qtenv2.bat"
+@rem call "D:/Qt/Qt5.12.0/5.12.0/msvc2017_64/bin/qtenv2.bat"
+
+@rem Win32  or x64
+set ArchType=x64  
 
 set BuildType=Release
 set ProjName=
@@ -50,9 +57,61 @@ set CMakeListsFile=LibCMakeLists.txt
 if exist %CMakeListsFile% (
     copy %CMakeListsFile% CMakeLists.txt /y
 )
+call :TaskKillSpecProcess  "cl.exe"
+call :TaskKillSpecProcess  "MSBuild.exe"
+
 call :CompileProject %BuildDir% %BuildType% %ProjName% "%HomeDir%"
 
 pause
+goto :eof
+
+:del_lib_cacke_dir
+    setlocal EnableDelayedExpansion
+    set lib_dir="%~1"
+    set home_dir="%~2"
+    call :color_text 2f "++++++++++++++ del_lib_cacke_dir ++++++++++++++"
+    pushd %lib_dir%
+        set idx=0
+        for /f %%i in ( 'dir /b /ad ' ) do (
+            set /a idx+=1
+            set cur_lib_name=%%i
+            echo [!idx!] !cur_lib_name!
+            if exist !cur_lib_name!\dyzbuild (
+                echo !cur_lib_name!\dyzbuild does exist
+                pause
+            )
+            if exist !cur_lib_name!\SMP\.vs (
+                echo !cur_lib_name!\SMP\.vs does exist
+                pause
+            )
+            if exist !cur_lib_name!\SMP\obj (
+                echo !cur_lib_name!\SMP\obj does exist
+                pause
+            )
+            tar -caf !cur_lib_name!.tar.gz !cur_lib_name!
+        )
+    popd
+    call :color_text 2f " -------------- del_lib_cacke_dir --------------- "
+    endlocal
+goto :eof
+
+:TaskKillSpecProcess
+    setlocal EnableDelayedExpansion
+    set ProcName=%~1
+    call :color_text 2f " +++++++++++++++++++ TaskKillSpecProcess +++++++++++++++++++ "
+    tasklist | grep  "%ProcName%"
+    taskkill /f /im  "%ProcName%"
+    call :color_text 2f " -------------------- TaskKillSpecProcess ----------------------- "
+    endlocal
+goto :eof
+
+:upgrade_python_pip
+    setlocal EnableDelayedExpansion
+    python -m ensurepip
+    python -m pip install --upgrade pip
+    pip3 install Jinja2
+    call :color_text 2f " -------------------- upgrade_python_pip ----------------------- "
+    endlocal
 goto :eof
 
 :DetectProgramDir
@@ -162,7 +221,7 @@ goto :eof
     set BuildType=%~2
     set ProjName=%~3
     set LibHomeDir=%~4
-    call :color_text 2f "+++++++++++++++++++CompileProject+++++++++++++++++++++++"
+    call :color_text 2f " +++++++++++++++++++ CompileProject +++++++++++++++++++++++ "
     if not exist %BuildDir% (
         mkdir %BuildDir%
     ) 
@@ -181,7 +240,7 @@ goto :eof
         @rem cmake .. -G"Visual Studio 16 2019" -A Win64
         @rem cmake -G "Visual Studio 8 2005"  ..
         @rem cmake --build . --target clean
-        cmake .. -DDYZ_DBG=ON -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ProgramDir%\%ProjName%
+        cmake .. -DDYZ_DBG=ON -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ProgramDir%\%ProjName%      -A %ArchType%
         @rem call :ResetSystemEnv
         @rem cmake --build .  --config %BuildType%  --target %ProjName%
         cmake --build . -j16  --config %BuildType% --target %ProjName%
@@ -266,10 +325,12 @@ goto :eof
 
 :SetProjEnv
     setlocal ENABLEDELAYEDEXPANSION
-    set loc_dir=%~1
-    set loc_inc=%2
-    set loc_lib=%3
-    set loc_bin=%4
+    set software_dir=%~1
+    set loc_dir=%~2
+    set loc_inc=%3
+    set loc_lib=%4
+    set loc_bin=%5
+    call :color_text 9f " ++++++++++++++ SetProjEnv ++++++++++++++ "
     if not exist %software_dir% (
         echo software_dir '%software_dir%' doesn't exist!
         goto :eof
@@ -282,19 +343,20 @@ goto :eof
     set all_inc=%loc_inc%;%include%;%loc_dir%\include;
     set all_lib=%loc_lib%;%lib%;%loc_dir%\lib;%loc_dir%\bin;
     set all_bin=%loc_bin%;%path%;%loc_dir%\bin;
-    endlocal & set %~2=%all_inc% & set %~3=%all_lib% & set %~4=%all_bin% & set %~5=%cmake_inc% & set %~6=%cmake_lib% & set %~7=%cmake_path%
+    call :color_text 9f " -------------- SetProjEnv -------------- "
+    endlocal & set %~3=%all_inc% & set %~4=%all_lib% & set %~5=%all_bin% & set %~6=%cmake_inc% & set %~7=%cmake_lib% & set %~8=%cmake_path%
 goto :eof
 
 :ShowProjEnv
     setlocal ENABLEDELAYEDEXPANSION
-    call :color_text 9f "++++++++++++++ShowProjEnv++++++++++++++"
-    echo include:%include%
-    echo lib:%lib%
-    echo path:%path%
+    call :color_text 9f " ++++++++++++++ ShowProjEnv ++++++++++++++ "
+    echo include           :%include%
+    echo lib               :%lib%
+    echo path              :%path%
     echo CMAKE_INCLUDE_PATH:%CMAKE_INCLUDE_PATH%
     echo CMAKE_LIBRARY_PATH:%CMAKE_LIBRARY_PATH%
-    echo CMAKE_MODULE_PATH:%CMAKE_MODULE_PATH%
-    call :color_text 9f "--------------ShowProjEnv--------------"
+    echo CMAKE_MODULE_PATH :%CMAKE_MODULE_PATH%
+    call :color_text 9f " -------------- ShowProjEnv -------------- "
     endlocal
 goto :eof
 
@@ -509,7 +571,7 @@ goto :eof
     set zip_file="%~1"
     set HomeDir=%~2
     set FileDir=
-
+    call :color_text 9f " ++++++++++++++ gen_env_by_file ++++++++++++++ "
     call :get_pre_sub_str !zip_file! . file_name
     call :get_last_char_pos !zip_file! . ext_name_pos
     echo file_name:!file_name! ext_name_pos:!ext_name_pos!
@@ -524,7 +586,7 @@ goto :eof
     ) else (
         echo "%ext_name%"
     )
-    call :color_text 9f "++++++++++++++gen_env_by_file++++++++++++++"
+    call :color_text 9f " -------------- gen_env_by_file -------------- "
     set DstDirWithHome=%HomeDir%\%FileDir%
     echo %0 %zip_file% %DstDirWithHome%
     endlocal & set %~3=%DstDirWithHome%
@@ -535,7 +597,7 @@ goto :eof
     set thridparty_dir="%~1"
     set home_dir="%~2"
     set DstDirWithHome=
-    call :color_text 2f "++++++++++++++gen_all_env_by_file++++++++++++++"
+    call :color_text 2f " ++++++++++++++ gen_all_env_by_file ++++++++++++++ "
     if not exist %thridparty_dir% (
         echo Dir '%thridparty_dir%' doesn't exist!
         goto :eof
@@ -553,7 +615,7 @@ goto :eof
             set CMAKE_MODULE_PATH=!DstDirWithHome!\cmake;!CMAKE_MODULE_PATH!
         )
     popd
-    call :color_text 9f "++++++++++++++gen_all_env_by_file++++++++++++++"
+    call :color_text 9f " -------------- gen_all_env_by_file -------------- "
     echo inc:%inc%
     echo lib:%lib%
     echo bin:%bin%
@@ -566,7 +628,7 @@ goto :eof
     set HomeDir=%~2
     set DstDirWithHome=%3
 
-    call :color_text 9f "++++++++++++++gen_env_by_dir++++++++++++++"
+    call :color_text 9f " ++++++++++++++ gen_env_by_dir ++++++++++++++ "
     set DstDirWithHome=%HomeDir%\%FileDir%
     echo %0 %zip_file% %DstDirWithHome%
     endlocal & set %~3=%DstDirWithHome%
@@ -577,7 +639,7 @@ goto :eof
     set thridparty_dir="%~1"
     set home_dir="%~2"
     set DstDirWithHome=
-    call :color_text 2f "++++++++++++++gen_all_env_by_dir++++++++++++++"
+    call :color_text 2f " ++++++++++++++ gen_all_env_by_dir ++++++++++++++ "
     if not exist %thridparty_dir% (
         echo Dir '%thridparty_dir%' doesn't exist!
         goto :eof
@@ -595,7 +657,7 @@ goto :eof
             set CMAKE_MODULE_PATH=!DstDirWithHome!\cmake;!CMAKE_MODULE_PATH!
         )
     popd
-    call :color_text 9f "++++++++++++++gen_all_env_by_dir++++++++++++++"
+    call :color_text 9f " -------------- gen_all_env_by_dir -------------- "
     echo inc:%inc%
     echo lib:%lib%
     echo bin:%bin%
@@ -604,13 +666,14 @@ goto :eof
 
 :show_all_env
     setlocal ENABLEDELAYEDEXPANSION
-    call :color_text 2f "++++++++++++++show_all_env++++++++++++++"
+    call :color_text 2f " ++++++++++++++ show_all_env ++++++++++++++ "
     echo all_inc:%all_inc%
     echo all_lib:%all_lib%
     echo all_bin:%all_bin%
     echo CMAKE_INCLUDE_PATH:%CMAKE_INCLUDE_PATH%
     echo CMAKE_LIBRARY_PATH:%CMAKE_LIBRARY_PATH%
     echo CMAKE_MODULE_PATH:%CMAKE_MODULE_PATH%
+    call :color_text 2f " -------------- show_all_env -------------- "
     endlocal
 goto :eof
 

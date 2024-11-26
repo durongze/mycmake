@@ -17,9 +17,11 @@ set old_sys_path="%path%"
 set PERL5LIB=%PERL5LIB%
 set PerlPath=%ProgramDir%\Perl\bin
 set NASMPath=%ProgramDir%\nasm\bin
+set YASMPath=%ProgramDir%\yasm\bin
+set GPERFPath=%ProgramDir%\gperf\bin
 set CMakePath=%ProgramDir%\cmake\bin
 set PythonHome=%ProgramDir%\python
-set PATH=%NASMPath%;%PerlPath%;%CMakePath%;%PythonHome%;%PATH%
+set PATH=%NASMPath%;%YASMPath%;%GPERFPath%;%PerlPath%;%CMakePath%;%PythonHome%;%PATH%
 
 set CurDir=%~dp0
 
