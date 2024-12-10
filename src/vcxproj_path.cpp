@@ -5,6 +5,7 @@
 
 #include <iostream>
 #include <regex>
+#include <filesystem>
 
 static std::string vsProjRootDir;
 
@@ -74,8 +75,15 @@ int CompareFileNameByPath(const std::map<std::string, int> &fileMap, const std::
 
 	for (iterFileAll = fileAll.begin(), iterFileMap = fileMap.cbegin() ; iterFileAll != fileAll.end() && iterFileMap != fileMap.cend(); )
 	{
+		std::filesystem::path curFileAll;
+		curFileAll = (iterFileAll->first);
+		curFileAll = curFileAll.lexically_normal();
+		std::filesystem::path curFileFilter;
+		curFileFilter = projRootDir + (iterFileMap->first);
+		curFileFilter = curFileFilter.lexically_normal();
 		std::string fileCur = iterFileAll->first.substr(projRootDir.length(), iterFileAll->first.length() - projRootDir.length());
-		ret = strcmp(fileCur.c_str(), iterFileMap->first.c_str());
+		
+		ret = strcmp(curFileAll.string().c_str(), curFileFilter.string().c_str());
 		if (ret > 0) {
 			os << fileMapNo << " FileMap[" << iterFileMap->second << "]:" << iterFileMap->first << std::endl;
 			iterFileMap++;

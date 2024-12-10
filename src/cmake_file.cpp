@@ -322,6 +322,8 @@ int CMakeFile::writeRootDir()
 	m_fs << "set(CMAKE_CXX_EXTENSIONS OFF) " << std::endl;
 	m_fs << "set(CMAKE_EXPORT_COMPILE_COMMANDS ON) " << std::endl  << std::endl;
 
+	m_fs << "set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)" << std::endl << std::endl;
+
 	m_fs << "set_property(GLOBAL PROPERTY USE_FOLDERS ON) " << std::endl << std::endl;
 
 	m_fs << "set(ENV{HomeDir}  ${CMAKE_CURRENT_LIST_DIR}/../out/${CMAKE_SYSTEM_NAME})" << std::endl << std::endl;
