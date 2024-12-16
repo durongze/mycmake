@@ -52,7 +52,7 @@ target_include_directories(${MYCMAKE_STATIC}   PUBLIC     ${MYCMAKE_INC_DIRS}   
 target_link_directories   (${MYCMAKE_STATIC}   PUBLIC     ${MYCMAKE_LIB_DIRS}                        )
 target_link_libraries     (${MYCMAKE_STATIC}              ${MYCMAKE_DEP_LIBS}     ${dep_libs}        )
 target_compile_options    (${MYCMAKE_STATIC}   PRIVATE     /Z7     /W4                               )
-set_target_properties     (${MYCMAKE_STATIC}   PROPERTIES CLEAN_DIRECT_OUTPUT 1   OUTPUT_NAME libavcodec_static  )
+set_target_properties     (${MYCMAKE_STATIC}   PROPERTIES CLEAN_DIRECT_OUTPUT 1   OUTPUT_NAME libmycmake_static  )
 
 set                       (  MYCMAKE_SHARED               libmycmake_shared                          )
 add_library               (${MYCMAKE_SHARED}   SHARED     ${MYCMAKE_ALL_SRCS}     ${MYCMAKE_SRC_MAIN})
@@ -61,7 +61,7 @@ target_include_directories(${MYCMAKE_SHARED}   PUBLIC     ${MYCMAKE_INC_DIRS}   
 target_link_directories   (${MYCMAKE_SHARED}   PUBLIC     ${MYCMAKE_LIB_DIRS}                        )
 target_link_libraries     (${MYCMAKE_SHARED}              ${MYCMAKE_DEP_LIBS}     ${dep_libs}        )
 target_compile_options    (${MYCMAKE_SHARED}   PRIVATE     /Z7     /W4                               )
-set_target_properties     (${MYCMAKE_SHARED}   PROPERTIES CLEAN_DIRECT_OUTPUT 1   OUTPUT_NAME libavcodec_shared  )
+set_target_properties     (${MYCMAKE_SHARED}   PROPERTIES CLEAN_DIRECT_OUTPUT 1   OUTPUT_NAME libmycmake_shared  )
 
 set                       (  MYCMAKE_APP                   mycmake_app                                   )
 add_executable            (${MYCMAKE_APP}                  ${MYCMAKE_ALL_SRCS}    ${MYCMAKE_SRC_MAIN}    )
