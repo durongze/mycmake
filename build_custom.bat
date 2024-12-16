@@ -20,6 +20,9 @@ set CMakePath=%ProgramDir%\cmake\bin
 set PythonHome=%ProgramDir%\python
 set PATH=%NASMPath%;%YASMPath%;%PerlPath%;%CMakePath%;%PythonHome%;%PythonHome%\Scripts;%PATH%
 
+call :TaskKillSpecProcess  "cl.exe"
+call :TaskKillSpecProcess  "MSBuild.exe"
+
 set CurDir=%~dp0
 
 set ProjDir=%CurDir:~0,-1%
@@ -57,8 +60,6 @@ set CMakeListsFile=LibCMakeLists.txt
 if exist %CMakeListsFile% (
     copy %CMakeListsFile% CMakeLists.txt /y
 )
-call :TaskKillSpecProcess  "cl.exe"
-call :TaskKillSpecProcess  "MSBuild.exe"
 
 call :CompileProject %BuildDir% %BuildType% %ProjName% "%HomeDir%"
 
@@ -178,7 +179,7 @@ goto :eof
 :DetectVsPath
     setlocal EnableDelayedExpansion
     set VsBatFileVar=%~1
-    call :color_text 2f "++++++++++++++++++ DetectVsPath +++++++++++++++++++++++"
+    call :color_text 2f " ++++++++++++++++++ DetectVsPath +++++++++++++++++++++++ "
     set VSDiskSet=C;D;E;F;G;
     set AllProgramsPathSet=program
     set AllProgramsPathSet=%AllProgramsPathSet%;programs
@@ -240,7 +241,7 @@ goto :eof
         @rem cmake .. -G"Visual Studio 16 2019" -A Win64
         @rem cmake -G "Visual Studio 8 2005"  ..
         @rem cmake --build . --target clean
-        cmake .. -DDYZ_DBG=ON -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ProgramDir%\%ProjName%      -A %ArchType%
+        cmake .. -DDYZ_DBG=ON -DCMAKE_BUILD_TYPE=%BuildType% -DCMAKE_INSTALL_PREFIX=%ProgramDir%\%ProjName% -A %ArchType%
         @rem call :ResetSystemEnv
         @rem cmake --build .  --config %BuildType%  --target %ProjName%
         cmake --build . -j16  --config %BuildType% --target %ProjName%
@@ -260,6 +261,7 @@ goto :eof
             call %build_mrp_ext%
         )
     popd
+
     endlocal
 goto :eof
 
